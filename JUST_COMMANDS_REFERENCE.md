@@ -5,6 +5,9 @@ This document provides a comprehensive reference for all Just commands available
 ## 📋 Table of Contents
 
 - [Universal Commands](#universal-commands)
+- [CI/CD Pipeline Commands](#cicd-pipeline-commands)
+- [Development Workflow Commands](#development-workflow-commands)
+- [Reporting Commands](#reporting-commands)
 - [Spring-Specific Commands](#spring-specific-commands)
 - [Maven Commands](#maven-commands)
 - [Utility Commands](#utility-commands)
@@ -85,6 +88,130 @@ These commands work across different build systems (Maven/Gradle) and are langua
 - Prepares deployment artifacts
 - Provides manual deployment instructions
 - Suggests Docker deployment option
+
+---
+
+## 🚀 CI/CD Pipeline Commands
+
+These commands implement comprehensive CI/CD workflows and quality gates.
+
+### `just ci-build`
+
+**Purpose:** CI build with full validation
+**What it does:**
+
+- Performs complete build pipeline
+- Step 1: Clean and build application
+- Step 2: Run all tests
+- Step 3: Code quality checks (lint)
+- Step 4: Format validation
+- Step 5: Generate coverage report
+- Ensures all quality gates pass
+
+### `just ci-test`
+
+**Purpose:** CI test with quality gates
+**What it does:**
+
+- Runs unit tests
+- Runs integration tests specifically
+- Performs coverage quality gate
+- Ensures test quality standards
+- Validates test coverage thresholds
+
+### `just quality-gate`
+
+**Purpose:** Comprehensive quality checks
+**What it does:**
+
+- Code formatting validation
+- Code quality checks (Checkstyle)
+- Test coverage analysis
+- Dependency tree analysis
+- Ensures all quality standards are met
+
+---
+
+## 🛠️ Development Workflow Commands
+
+These commands manage the development environment and workflow.
+
+### `just dev-start`
+
+**Purpose:** Start development environment
+**What it does:**
+
+- Checks Java environment
+- Checks Maven environment
+- Starts application in development mode
+- Enables development features
+- Sets up development workflow
+
+### `just dev-stop`
+
+**Purpose:** Stop development environment
+**What it does:**
+
+- Stops running application processes
+- Cleans up development resources
+- Ensures clean shutdown
+- Frees up system resources
+
+### `just dev-restart`
+
+**Purpose:** Restart development environment
+**What it does:**
+
+- Stops current development environment
+- Waits for clean shutdown
+- Restarts development environment
+- Ensures fresh development state
+
+### `just dev-status`
+
+**Purpose:** Show development environment status
+**What it does:**
+
+- Displays Java version information
+- Shows Maven version information
+- Checks if application is running
+- Provides development environment status
+
+---
+
+## 📊 Reporting Commands
+
+These commands generate comprehensive reports and analytics.
+
+### `just report-coverage`
+
+**Purpose:** Generate coverage report
+**What it does:**
+
+- Runs code coverage analysis
+- Generates JaCoCo coverage report
+- Creates HTML report at `target/site/jacoco/index.html`
+- Shows detailed coverage metrics
+
+### `just report-quality`
+
+**Purpose:** Generate quality report
+**What it does:**
+
+- Runs code quality metrics
+- Validates format compliance
+- Analyzes dependencies
+- Generates comprehensive quality report
+
+### `just report-test`
+
+**Purpose:** Generate test report
+**What it does:**
+
+- Runs Surefire test reporting
+- Creates test report at `target/site/surefire-report.html`
+- Shows test execution details
+- Provides test analytics
 
 ---
 
@@ -336,6 +463,46 @@ Helper commands for development and debugging.
 - Detects project structure
 - Provides project information
 
+### `just status`
+
+**Purpose:** Show project status
+**What it does:**
+
+- Checks if application is built
+- Verifies test execution status
+- Shows coverage report availability
+- Provides comprehensive project status
+
+### `just version`
+
+**Purpose:** Show version information
+**What it does:**
+
+- Displays application version
+- Shows Java version
+- Shows Maven version
+- Shows Git information
+
+### `just env-info`
+
+**Purpose:** Show environment information
+**What it does:**
+
+- Displays operating system info
+- Shows Java environment details
+- Shows Maven environment details
+- Shows system resources (memory, disk)
+
+### `just cleanup`
+
+**Purpose:** Cleanup temporary files
+**What it does:**
+
+- Removes temporary build files
+- Cleans up log files
+- Removes Maven timing files
+- Frees up disk space
+
 ### `just dev-setup`
 
 **Purpose:** Setup development environment
@@ -370,13 +537,16 @@ Helper commands for development and debugging.
 
 ## 📊 Command Categories Summary
 
-| Category            | Commands | Description                                  |
-| ------------------- | -------- | -------------------------------------------- |
-| **Universal**       | 7        | Cross-platform build and deployment commands |
-| **Spring-Specific** | 18       | Spring Boot specific features and tools      |
-| **Maven**           | 6        | Direct Maven plugin commands                 |
-| **Utility**         | 4        | Development and debugging helpers            |
-| **Total**           | **35**   | Complete command set                         |
+| Category                 | Commands | Description                                     |
+| ------------------------ | -------- | ----------------------------------------------- |
+| **Universal**            | 7        | Cross-platform build and deployment commands    |
+| **CI/CD Pipeline**       | 3        | Comprehensive CI/CD workflows and quality gates |
+| **Development Workflow** | 4        | Development environment management              |
+| **Reporting**            | 3        | Comprehensive reporting and analytics           |
+| **Spring-Specific**      | 18       | Spring Boot specific features and tools         |
+| **Maven**                | 6        | Direct Maven plugin commands                    |
+| **Utility**              | 8        | Development and debugging helpers               |
+| **Total**                | **55**   | Complete command set                            |
 
 ### Command Distribution
 
@@ -386,6 +556,10 @@ Helper commands for development and debugging.
 - **Development Commands:** 2 (Native Build, Dev Tools)
 - **Container Commands:** 3 (Test Containers, Docker Compose Up/Down)
 - **Info Commands:** 3 (Properties, Dependencies, Application Info)
+- **CI/CD Commands:** 3 (CI Build, CI Test, Quality Gate)
+- **Workflow Commands:** 4 (Dev Start/Stop/Restart/Status)
+- **Reporting Commands:** 3 (Coverage, Quality, Test Reports)
+- **Utility Commands:** 8 (Status, Version, Environment, Cleanup, etc.)
 
 ---
 
@@ -403,6 +577,36 @@ just run-h2
 
 # Check health
 just actuator-health
+```
+
+### CI/CD Pipeline
+
+```bash
+# Full CI build with validation
+just ci-build
+
+# Quality gate check
+just quality-gate
+
+# Generate reports
+just report-coverage
+just report-quality
+```
+
+### Development Environment Management
+
+```bash
+# Start development environment
+just dev-start
+
+# Check status
+just dev-status
+
+# Restart if needed
+just dev-restart
+
+# Stop when done
+just dev-stop
 ```
 
 ### Testing and Quality
@@ -440,6 +644,19 @@ just test-containers
 just docker-compose-down
 ```
 
+### Project Monitoring
+
+```bash
+# Check project status
+just status
+
+# Show version info
+just version
+
+# Environment information
+just env-info
+```
+
 ---
 
 ## 📝 Notes
@@ -449,7 +666,10 @@ just docker-compose-down
 - Spring Boot Actuator endpoints require application to be running
 - Some commands may fail if JAR file is in use by another process
 - Docker commands require Docker to be installed and running
+- CI/CD commands provide comprehensive validation workflows
+- Development workflow commands manage environment lifecycle
+- Reporting commands generate detailed analytics and insights
 
 ---
 
-_This documentation covers all 35 Just commands available in the Spring PetClinic project. Each command is designed to simplify common development tasks and provide a consistent interface across different build systems._
+_This documentation covers all 55 Just commands available in the Spring PetClinic project. Each command is designed to simplify common development tasks and provide a consistent interface across different build systems. The pipeline demonstrates comprehensive CI/CD capabilities, development workflow management, and extensive reporting capabilities._
