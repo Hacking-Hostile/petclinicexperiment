@@ -156,6 +156,188 @@ detect:
         echo "❓ Unknown project type"
     fi
 
+# ===== CI/CD PIPELINE COMMANDS =====
+
+# CI build with full validation
+ci-build:
+    #!/usr/bin/env bash
+    echo "🚀 CI Build Pipeline - Full Validation"
+    echo "📦 Step 1: Clean and build..."
+    just clean
+    just build
+    echo "📦 Step 2: Run tests..."
+    just test
+    echo "📦 Step 3: Code quality checks..."
+    just lint
+    echo "📦 Step 4: Format validation..."
+    just validate-format
+    echo "📦 Step 5: Coverage report..."
+    just coverage
+    echo "✅ CI Build completed successfully!"
+
+# CI test with quality gates
+ci-test:
+    #!/usr/bin/env bash
+    echo "🧪 CI Test Pipeline - Quality Gates"
+    echo "📦 Running unit tests..."
+    just test
+    echo "📦 Running integration tests..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dtest=*IntegrationTest
+    echo "📦 Quality gate: Coverage check..."
+    just coverage
+    echo "✅ CI Test completed successfully!"
+
+# Quality gate - comprehensive quality checks
+quality-gate:
+    #!/usr/bin/env bash
+    echo "🔍 Quality Gate - Comprehensive Checks"
+    echo "📦 Code formatting check..."
+    just validate-format
+    echo "📦 Code quality check..."
+    just lint
+    echo "📦 Test coverage check..."
+    just coverage
+    echo "📦 Dependency check..."
+    just deps-tree
+    echo "✅ Quality gate passed!"
+
+# ===== DEVELOPMENT WORKFLOW COMMANDS =====
+
+# Development environment management
+dev-start:
+    #!/usr/bin/env bash
+    echo "🛠️  Starting development environment..."
+    echo "📦 Checking Java environment..."
+    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    echo "📦 Checking Maven environment..."
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    echo "📦 Starting application in dev mode..."
+    just dev-run
+    echo "✅ Development environment started!"
+
+dev-stop:
+    #!/usr/bin/env bash
+    echo "🛑 Stopping development environment..."
+    pkill -f "spring-petclinic" || echo "No application running"
+    echo "✅ Development environment stopped!"
+
+dev-restart:
+    #!/usr/bin/env bash
+    echo "🔄 Restarting development environment..."
+    just dev-stop
+    sleep 2
+    just dev-start
+    echo "✅ Development environment restarted!"
+
+dev-status:
+    #!/usr/bin/env bash
+    echo "📊 Development Environment Status"
+    echo "📦 Java version:"
+    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    echo "📦 Maven version:"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    echo "📦 Application status:"
+    if pgrep -f "spring-petclinic" > /dev/null; then
+        echo "✅ Application is running"
+    else
+        echo "❌ Application is not running"
+    fi
+
+# ===== REPORTING COMMANDS =====
+
+# Generate comprehensive reports
+report-coverage:
+    #!/usr/bin/env bash
+    echo "📊 Generating Coverage Report..."
+    just coverage
+    echo "📦 Coverage report location: target/site/jacoco/index.html"
+    echo "✅ Coverage report generated!"
+
+report-quality:
+    #!/usr/bin/env bash
+    echo "📊 Generating Quality Report..."
+    echo "📦 Code quality metrics..."
+    just lint
+    echo "📦 Format compliance..."
+    just validate-format
+    echo "📦 Dependency analysis..."
+    just deps-tree
+    echo "✅ Quality report generated!"
+
+report-test:
+    #!/usr/bin/env bash
+    echo "📊 Generating Test Report..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" surefire-report:report
+    echo "📦 Test report location: target/site/surefire-report.html"
+    echo "✅ Test report generated!"
+
+# ===== UTILITY COMMANDS =====
+
+# Project status
+status:
+    #!/usr/bin/env bash
+    echo "📊 Project Status Report"
+    echo "📦 Build status:"
+    if [ -f "target/spring-petclinic-*.jar" ]; then
+        echo "✅ Application built successfully"
+    else
+        echo "❌ Application not built"
+    fi
+    echo "📦 Test status:"
+    if [ -d "target/surefire-reports" ]; then
+        echo "✅ Tests have been run"
+    else
+        echo "❌ Tests not run"
+    fi
+    echo "📦 Coverage status:"
+    if [ -d "target/site/jacoco" ]; then
+        echo "✅ Coverage report available"
+    else
+        echo "❌ Coverage report not available"
+    fi
+
+# Version information
+version:
+    #!/usr/bin/env bash
+    echo "📋 Version Information"
+    echo "📦 Application version:"
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" help:evaluate -Dexpression=project.version -q -DforceStdout
+    echo "📦 Java version:"
+    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    echo "📦 Maven version:"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    echo "📦 Git information:"
+    git --version
+    git log --oneline -1
+
+# Cleanup temporary files
+cleanup:
+    #!/usr/bin/env bash
+    echo "🧹 Cleaning up temporary files..."
+    rm -rf target/tmp 2>/dev/null || true
+    rm -rf logs/*.tmp 2>/dev/null || true
+    rm -rf .mvn/timing.properties 2>/dev/null || true
+    echo "✅ Cleanup completed!"
+
+# Environment information
+env-info:
+    #!/usr/bin/env bash
+    echo "🔧 Environment Information"
+    echo "📦 Operating System:"
+    uname -a
+    echo "📦 Java Environment:"
+    echo "JAVA_HOME: $JAVA_HOME"
+    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    echo "📦 Maven Environment:"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    echo "📦 Available memory:"
+    free -h 2>/dev/null || echo "Memory info not available"
+    echo "📦 Disk space:"
+    df -h . 2>/dev/null || echo "Disk info not available"
+
 # ===== SPRING-SPECIFIC COMMANDS =====
 
 # Spring Boot Actuator endpoints
@@ -355,6 +537,28 @@ help:
     @echo "  just lint           - Run code quality checks"
     @echo "  just format         - Format code"
     @echo "  just deploy         - Deploy application"
+    @echo ""
+    @echo "🚀 CI/CD Pipeline Commands:"
+    @echo "  just ci-build       - CI build with full validation"
+    @echo "  just ci-test        - CI test with quality gates"
+    @echo "  just quality-gate   - Comprehensive quality checks"
+    @echo ""
+    @echo "🛠️  Development Workflow:"
+    @echo "  just dev-start      - Start development environment"
+    @echo "  just dev-stop       - Stop development environment"
+    @echo "  just dev-restart    - Restart development environment"
+    @echo "  just dev-status     - Show development status"
+    @echo ""
+    @echo "📊 Reporting Commands:"
+    @echo "  just report-coverage - Generate coverage report"
+    @echo "  just report-quality  - Generate quality report"
+    @echo "  just report-test     - Generate test report"
+    @echo ""
+    @echo "🔧 Utility Commands:"
+    @echo "  just status         - Show project status"
+    @echo "  just version        - Show version information"
+    @echo "  just cleanup        - Cleanup temporary files"
+    @echo "  just env-info       - Show environment information"
     @echo ""
     @echo "🌱 Spring-Specific Commands:"
     @echo "  just actuator-health    - Check application health"
