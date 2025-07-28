@@ -106,7 +106,7 @@ format:
         echo "✅ Format completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle formatter"
-        ./gradlew spotlessApply
+        ./gradlew formatMain
         echo "✅ Format completed!"
     else
         echo "⚠️  No formatting configured for this project"
@@ -155,6 +155,129 @@ detect:
     else
         echo "❓ Unknown project type"
     fi
+
+# ===== SPRING-SPECIFIC COMMANDS =====
+
+# Spring Boot Actuator endpoints
+actuator-health:
+    #!/usr/bin/env bash
+    echo "🏥 Checking Spring Boot Actuator health..."
+    curl -s http://localhost:8080/actuator/health | jq . || echo "❌ Health endpoint not available or jq not installed"
+
+actuator-info:
+    #!/usr/bin/env bash
+    echo "ℹ️  Getting Spring Boot Actuator info..."
+    curl -s http://localhost:8080/actuator/info | jq . || echo "❌ Info endpoint not available or jq not installed"
+
+actuator-metrics:
+    #!/usr/bin/env bash
+    echo "📊 Getting Spring Boot Actuator metrics..."
+    curl -s http://localhost:8080/actuator/metrics | jq . || echo "❌ Metrics endpoint not available or jq not installed"
+
+actuator-env:
+    #!/usr/bin/env bash
+    echo "🔧 Getting Spring Boot Actuator environment..."
+    curl -s http://localhost:8080/actuator/env | jq . || echo "❌ Environment endpoint not available or jq not installed"
+
+# Database profile commands
+run-h2:
+    #!/usr/bin/env bash
+    echo "🗄️  Running with H2 database (default)..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=h2
+
+run-mysql:
+    #!/usr/bin/env bash
+    echo "🗄️  Running with MySQL database..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=mysql
+
+run-postgres:
+    #!/usr/bin/env bash
+    echo "🗄️  Running with PostgreSQL database..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=postgres
+
+# Code coverage
+coverage:
+    #!/usr/bin/env bash
+    echo "📊 Running code coverage with JaCoCo..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" clean test jacoco:report
+    echo "✅ Coverage report generated at target/site/jacoco/index.html"
+
+# Native image building
+native-build:
+    #!/usr/bin/env bash
+    echo "🏗️  Building native image with GraalVM..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:build-image
+    echo "✅ Native image built successfully!"
+
+# Spring Boot DevTools
+dev-run:
+    #!/usr/bin/env bash
+    echo "🛠️  Running in development mode with DevTools..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true"
+
+# CSS compilation
+compile-css:
+    #!/usr/bin/env bash
+    echo "🎨 Compiling CSS with LibSass..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" compile -Pcss
+    echo "✅ CSS compilation completed!"
+
+# Spring Boot validation
+validate-format:
+    #!/usr/bin/env bash
+    echo "✅ Validating Spring Java Format..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:validate
+    echo "✅ Format validation completed!"
+
+# Spring Boot test with containers
+test-containers:
+    #!/usr/bin/env bash
+    echo "🐳 Running tests with Testcontainers..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dspring.docker.compose.skip.in-tests=false
+    echo "✅ Container tests completed!"
+
+# Spring Boot Docker Compose
+docker-compose-up:
+    #!/usr/bin/env bash
+    echo "🐳 Starting services with Docker Compose..."
+    docker-compose up -d
+    echo "✅ Services started!"
+
+docker-compose-down:
+    #!/usr/bin/env bash
+    echo "🐳 Stopping services with Docker Compose..."
+    docker-compose down
+    echo "✅ Services stopped!"
+
+# Spring Boot application properties
+show-props:
+    #!/usr/bin/env bash
+    echo "📋 Showing Spring Boot application properties..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--debug" 2>&1 | grep "DEBUG" | head -20
+
+# Spring Boot dependency tree
+deps-tree:
+    #!/usr/bin/env bash
+    echo "🌳 Showing dependency tree..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:tree
+
+# Spring Boot application info
+app-info:
+    #!/usr/bin/env bash
+    echo "ℹ️  Getting application information..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
+    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--info" 2>&1 | grep "INFO" | head -10
 
 # Maven-specific commands
 mvn-clean:
@@ -232,6 +355,26 @@ help:
     @echo "  just lint           - Run code quality checks"
     @echo "  just format         - Format code"
     @echo "  just deploy         - Deploy application"
+    @echo ""
+    @echo "🌱 Spring-Specific Commands:"
+    @echo "  just actuator-health    - Check application health"
+    @echo "  just actuator-info      - Get application info"
+    @echo "  just actuator-metrics   - Get application metrics"
+    @echo "  just actuator-env       - Get environment info"
+    @echo "  just run-h2             - Run with H2 database"
+    @echo "  just run-mysql          - Run with MySQL database"
+    @echo "  just run-postgres       - Run with PostgreSQL database"
+    @echo "  just coverage           - Run code coverage"
+    @echo "  just native-build       - Build native image"
+    @echo "  just dev-run            - Run with DevTools"
+    @echo "  just compile-css        - Compile CSS"
+    @echo "  just validate-format    - Validate code format"
+    @echo "  just test-containers    - Run tests with containers"
+    @echo "  just docker-compose-up  - Start Docker services"
+    @echo "  just docker-compose-down - Stop Docker services"
+    @echo "  just show-props         - Show application properties"
+    @echo "  just deps-tree          - Show dependency tree"
+    @echo "  just app-info           - Get application info"
     @echo ""
     @echo "📦 Maven Commands:"
     @echo "  just mvn-clean      - Maven clean"
