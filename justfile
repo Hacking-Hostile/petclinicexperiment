@@ -66,7 +66,7 @@ run:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "target/spring-petclinic-*.jar" ]; then
         echo "📦 Running JAR file"
-        java -jar target/spring-petclinic-*.jar
+        "/c/Program Files/Java/jdk-24/bin/java.exe" -jar target/spring-petclinic-*.jar
     elif [ -f "pom.xml" ]; then
         echo "📦 Running with Maven Spring Boot plugin"
         "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run
@@ -82,9 +82,10 @@ run:
 lint:
     #!/usr/bin/env bash
     echo "🔍 Running code quality checks..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven checkstyle"
-        mvn checkstyle:check
+        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:check
         echo "✅ Lint completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle checkstyle"
@@ -98,9 +99,10 @@ lint:
 format:
     #!/usr/bin/env bash
     echo "🎨 Formatting code..."
+    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven formatter"
-        mvn spotless:apply
+        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:apply
         echo "✅ Format completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle formatter"
@@ -203,7 +205,7 @@ dev-setup:
     #!/usr/bin/env bash
     echo "🛠️  Setting up development environment..."
     echo "📦 Checking Java version..."
-    java -version
+    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
     echo "📦 Checking Maven version..."
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
     echo "✅ Development environment ready!"
