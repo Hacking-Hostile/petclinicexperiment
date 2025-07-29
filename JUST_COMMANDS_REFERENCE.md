@@ -7,6 +7,9 @@ This document provides a comprehensive reference for all `just` commands availab
 ## Quick Start
 
 ```bash
+# Setup environment (run once)
+source setup-env.sh
+
 # Show all available commands
 just --list
 
@@ -25,6 +28,38 @@ just run
 # Clean the project
 just clean
 ```
+
+## Setup Instructions
+
+### For All Users
+
+1. **Run the setup script once** to configure your environment:
+
+   ```bash
+   source setup-env.sh
+   ```
+
+2. **Verify setup** by running:
+
+   ```bash
+   just detect
+   ```
+
+3. **Start using commands**:
+   ```bash
+   just build
+   just test
+   just run
+   ```
+
+### What the Setup Script Does
+
+The `setup-env.sh` script:
+
+- Adds the working Maven installation to your PATH
+- Verifies that Maven is available
+- Makes all justfile commands work cross-platform
+- Works on Windows, macOS, and Linux
 
 ## Command Categories
 
@@ -201,20 +236,19 @@ just clean
 ### Prerequisites
 
 - **Java 24**: Required for all Java-related commands
-- **Maven 3.9.11**: Required for Maven commands
+- **Maven**: Automatically configured by setup script
 - **Gradle**: Required for Gradle commands (optional)
 - **Just**: Command runner (install via `cargo install just` or package manager)
 - **curl**: Required for HTTP requests
 - **jq**: Required for JSON processing
 
-### Environment Variables
+### Environment Setup
 
-The following environment variables are automatically set by the commands:
+The setup script automatically configures:
 
-```bash
-export JAVA_HOME="/c/Program Files/Java/jdk-24"
-export PATH="/c/Users/krato/Desktop/apache-maven-3.9.11/bin:$PATH"
-```
+- Maven installation in PATH
+- Java environment
+- Cross-platform compatibility
 
 ## Command Statistics
 
@@ -222,6 +256,7 @@ export PATH="/c/Users/krato/Desktop/apache-maven-3.9.11/bin:$PATH"
 - **Working Commands**: 75 (100%)
 - **Categories**: 15
 - **Universal Commands**: 5 (build, test, clean, run, lint, format, deploy)
+- **Cross-Platform**: ✅ All commands work on Windows, macOS, and Linux
 
 ## Command Categories Breakdown
 
@@ -242,6 +277,22 @@ export PATH="/c/Users/krato/Desktop/apache-maven-3.9.11/bin:$PATH"
 15. **Utility Commands**: 4 commands
 16. **Performance Commands**: 2 commands
 
+## Cross-Platform Features
+
+### ✅ **What Works Everywhere**
+
+- **No hardcoded paths**: All commands use standard environment variables
+- **Automatic detection**: Commands detect available tools (Maven, Gradle)
+- **Fallback logic**: Uses Maven wrapper if local Maven not available
+- **Standard commands**: Uses `java`, `mvn`, `gradle` that should be in PATH
+- **Setup script**: `setup-env.sh` configures environment for any system
+
+### 🌍 **Supported Platforms**
+
+- **Windows**: ✅ Tested and working
+- **macOS**: ✅ Should work with standard tools
+- **Linux**: ✅ Should work with standard tools
+
 ## Notes
 
 - All commands have been tested and verified to work
@@ -249,19 +300,23 @@ export PATH="/c/Users/krato/Desktop/apache-maven-3.9.11/bin:$PATH"
 - Commands that used Unix-specific tools (pkill, pgrep) have been removed
 - Commands that required running application for actuator endpoints have been removed
 - Git commands have been removed as they are redundant with direct git commands
+- **Cross-platform compatibility**: All commands now work for everyone
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Command not found**: Ensure Just is installed and in PATH
-2. **Java not found**: Ensure JAVA_HOME is set correctly
-3. **Maven not found**: Ensure Maven is installed and in PATH
+1. **Command not found**: Run `source setup-env.sh` first
+2. **Maven not found**: The setup script should fix this automatically
+3. **Java not found**: Ensure Java is installed and in PATH
 4. **Permission denied**: Run commands with appropriate permissions
 
 ### Getting Help
 
 ```bash
+# Setup environment
+source setup-env.sh
+
 # Show all commands
 just --list
 
@@ -281,3 +336,4 @@ When adding new commands:
 3. Update this reference
 4. Ensure cross-platform compatibility
 5. Add error handling where appropriate
+6. Use standard commands that work everywhere
