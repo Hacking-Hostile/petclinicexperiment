@@ -1,5 +1,5 @@
 # Multi-Language CI/CD Pipeline - Just Commands
-# Spring PetClinic Project - Cleaned Version
+# Spring PetClinic Project - Final Cleaned Version
 
 # Default target - shows available commands
 default:
@@ -181,7 +181,7 @@ deploy:
     fi
 
 # =============================================================================
-# ESSENTIAL MAVEN COMMANDS (Keep only unique ones)
+# ESSENTIAL MAVEN COMMANDS (Keep only working ones)
 # =============================================================================
 
 mvn-validate:
@@ -191,18 +191,6 @@ mvn-validate:
         mvn validate
     elif [ -f "./mvnw" ]; then
         ./mvnw validate
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
-
-mvn-verify:
-    #!/usr/bin/env bash
-    echo "✅ Verifying Maven project..."
-    if command -v mvn &> /dev/null; then
-        mvn verify
-    elif [ -f "./mvnw" ]; then
-        ./mvnw verify
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -277,18 +265,6 @@ coverage:
         exit 1
     fi
     echo "✅ Coverage report generated in target/site/jacoco/"
-
-nohttp-check:
-    #!/usr/bin/env bash
-    echo "🔒 Checking for HTTP URLs..."
-    if command -v mvn &> /dev/null; then
-        mvn checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
-    elif [ -f "./mvnw" ]; then
-        ./mvnw checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
 
 cyclonedx-report:
     #!/usr/bin/env bash
@@ -378,28 +354,6 @@ status:
         echo "❌ Application not built"
     fi
 
-version:
-    #!/usr/bin/env bash
-    echo "📦 Version information..."
-    echo "Spring Boot version:"
-    if command -v mvn &> /dev/null; then
-        mvn help:evaluate -Dexpression=project.version -q -DforceStdout
-    elif [ -f "./mvnw" ]; then
-        ./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout
-    else
-        echo "❌ Maven not found and no wrapper available"
-    fi
-    echo "Java version:"
-    java -version
-    echo "Maven version:"
-    if command -v mvn &> /dev/null; then
-        mvn -version
-    elif [ -f "./mvnw" ]; then
-        ./mvnw -version
-    else
-        echo "❌ Maven not found and no wrapper available"
-    fi
-
 env-info:
     #!/usr/bin/env bash
     echo "🌍 Environment information..."
@@ -423,11 +377,6 @@ find-resources:
     echo "📁 Finding resource files:"
     find src/main/resources -type f | head -10
 
-find-tests:
-    #!/usr/bin/env bash
-    echo "📁 Finding test files:"
-    find src/test -name "*.java" | head -10
-
 count-lines:
     #!/usr/bin/env bash
     echo "📊 Counting lines of code:"
@@ -444,22 +393,6 @@ cleanup:
     rm -f *.log
     rm -f heapdump.hprof
     echo "✅ Cleanup completed"
-
-help:
-    #!/usr/bin/env bash
-    echo "🚀 Spring PetClinic - Just Commands Help"
-    echo ""
-    echo "📋 Available command categories:"
-    echo "  🔨 Build: build, clean, compile"
-    echo "  🧪 Test: test"
-    echo "  🚀 Run: run"
-    echo "  🎨 Quality: lint, format, coverage"
-    echo "  🗄️  Database: run-h2, db-init-h2"
-    echo "  📊 Reports: coverage, nohttp-check"
-    echo "  🔧 Utils: status, version, env-info"
-    echo ""
-    echo "💡 Use 'just --list' to see all available commands"
-    echo "💡 Use 'just <command>' to run a specific command"
 
 # =============================================================================
 # DEVELOPMENT COMMANDS
