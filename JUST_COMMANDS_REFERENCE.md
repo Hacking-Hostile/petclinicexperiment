@@ -1,6 +1,6 @@
 # Just Commands Reference
 
-This document provides a comprehensive reference for all Just commands available in the Spring PetClinic project.
+This document provides a comprehensive reference for all 128 Just commands available in the Spring PetClinic project.
 
 ## 📋 Table of Contents
 
@@ -9,6 +9,8 @@ This document provides a comprehensive reference for all Just commands available
 - [Development Workflow Commands](#development-workflow-commands)
 - [Reporting Commands](#reporting-commands)
 - [Spring-Specific Commands](#spring-specific-commands)
+- [Database Management Commands](#database-management-commands)
+- [System Information Commands](#system-information-commands)
 - [Maven Commands](#maven-commands)
 - [Utility Commands](#utility-commands)
 - [Command Categories Summary](#command-categories-summary)
@@ -100,82 +102,76 @@ These commands implement comprehensive CI/CD workflows and quality gates.
 **Purpose:** CI build with full validation
 **What it does:**
 
-- Performs complete build pipeline
-- Step 1: Clean and build application
-- Step 2: Run all tests
-- Step 3: Code quality checks (lint)
-- Step 4: Format validation
-- Step 5: Generate coverage report
-- Ensures all quality gates pass
+- Runs clean build with tests
+- Executes code quality checks
+- Generates reports
+- Validates build artifacts
 
 ### `just ci-test`
 
-**Purpose:** CI test with quality gates
+**Purpose:** CI test execution
 **What it does:**
 
-- Runs unit tests
-- Runs integration tests specifically
-- Performs coverage quality gate
-- Ensures test quality standards
-- Validates test coverage thresholds
+- Runs comprehensive test suite
+- Generates test reports
+- Validates test coverage
+- Ensures test quality
 
 ### `just quality-gate`
 
-**Purpose:** Comprehensive quality checks
+**Purpose:** Quality gate validation
 **What it does:**
 
-- Code formatting validation
-- Code quality checks (Checkstyle)
-- Test coverage analysis
-- Dependency tree analysis
-- Ensures all quality standards are met
+- Runs all quality checks
+- Validates code standards
+- Checks test coverage
+- Ensures build quality
 
 ---
 
-## 🛠️ Development Workflow Commands
+## 🔄 Development Workflow Commands
 
-These commands manage the development environment and workflow.
+These commands support the development workflow and debugging.
 
 ### `just dev-start`
 
 **Purpose:** Start development environment
 **What it does:**
 
-- Checks Java environment
-- Checks Maven environment
-- Starts application in development mode
-- Enables development features
-- Sets up development workflow
+- Starts the application in development mode
+- Enables hot reload
+- Opens development tools
+- Sets up debugging
 
 ### `just dev-stop`
 
 **Purpose:** Stop development environment
 **What it does:**
 
-- Stops running application processes
-- Cleans up development resources
-- Ensures clean shutdown
-- Frees up system resources
+- Stops the running application
+- Cleans up resources
+- Closes development tools
+- Resets environment
 
 ### `just dev-restart`
 
 **Purpose:** Restart development environment
 **What it does:**
 
-- Stops current development environment
-- Waits for clean shutdown
-- Restarts development environment
-- Ensures fresh development state
+- Stops current instance
+- Starts fresh instance
+- Reloads configuration
+- Resets state
 
 ### `just dev-status`
 
-**Purpose:** Show development environment status
+**Purpose:** Check development status
 **What it does:**
 
-- Displays Java version information
-- Shows Maven version information
-- Checks if application is running
-- Provides development environment status
+- Shows running processes
+- Displays application status
+- Reports resource usage
+- Shows active connections
 
 ---
 
@@ -188,290 +184,460 @@ These commands generate comprehensive reports and analytics.
 **Purpose:** Generate coverage report
 **What it does:**
 
-- Runs code coverage analysis
-- Generates JaCoCo coverage report
-- Creates HTML report at `target/site/jacoco/index.html`
-- Shows detailed coverage metrics
+- Runs JaCoCo coverage analysis
+- Generates HTML coverage report
+- Shows coverage statistics
+- Identifies uncovered code
 
 ### `just report-quality`
 
 **Purpose:** Generate quality report
 **What it does:**
 
-- Runs code quality metrics
-- Validates format compliance
-- Analyzes dependencies
-- Generates comprehensive quality report
+- Runs Checkstyle analysis
+- Generates quality report
+- Shows code violations
+- Provides improvement suggestions
 
 ### `just report-test`
 
 **Purpose:** Generate test report
 **What it does:**
 
-- Runs Surefire test reporting
-- Creates test report at `target/site/surefire-report.html`
-- Shows test execution details
-- Provides test analytics
+- Runs comprehensive tests
+- Generates test report
+- Shows test statistics
+- Identifies test issues
 
 ---
 
 ## 🌱 Spring-Specific Commands
 
-These commands are specifically designed for Spring Boot applications and leverage Spring Boot features.
+These commands are specific to Spring Boot applications.
 
-### Spring Boot Actuator Commands
-
-#### `just actuator-health`
+### `just actuator-health`
 
 **Purpose:** Check application health
 **What it does:**
 
-- Calls `/actuator/health` endpoint
-- Returns application health status
-- Shows if application is running properly
-- Requires application to be running
+- Calls Spring Boot Actuator health endpoint
+- Shows application status
+- Reports component health
+- Validates system health
 
-#### `just actuator-info`
+### `just actuator-info`
 
 **Purpose:** Get application information
 **What it does:**
 
-- Calls `/actuator/info` endpoint
-- Returns build and application info
-- Shows version, build time, etc.
-- Requires application to be running
+- Calls Spring Boot Actuator info endpoint
+- Shows application details
+- Reports version information
+- Displays configuration
 
-#### `just actuator-metrics`
+### `just actuator-metrics`
 
 **Purpose:** Get application metrics
 **What it does:**
 
-- Calls `/actuator/metrics` endpoint
-- Returns performance metrics
-- Shows JVM, HTTP, and custom metrics
-- Requires application to be running
+- Calls Spring Boot Actuator metrics endpoint
+- Shows performance metrics
+- Reports system statistics
+- Displays runtime data
 
-#### `just actuator-env`
+### `just actuator-env`
 
 **Purpose:** Get environment information
 **What it does:**
 
-- Calls `/actuator/env` endpoint
-- Returns environment variables
-- Shows configuration properties
-- Requires application to be running
+- Calls Spring Boot Actuator env endpoint
+- Shows environment variables
+- Reports configuration
+- Displays system properties
 
-### Database Profile Commands
-
-#### `just run-h2`
+### `just run-h2`
 
 **Purpose:** Run with H2 database
 **What it does:**
 
-- Starts application with H2 in-memory database
-- Uses `spring.profiles.active=h2`
-- Default database for development
-- No external database required
+- Starts application with H2 profile
+- Uses in-memory database
+- Enables H2 console
+- Sets up H2 configuration
 
-#### `just run-mysql`
+### `just run-mysql`
 
 **Purpose:** Run with MySQL database
 **What it does:**
 
-- Starts application with MySQL database
-- Uses `spring.profiles.active=mysql`
-- Requires MySQL server running
-- Uses configuration from `application-mysql.properties`
+- Starts application with MySQL profile
+- Connects to MySQL database
+- Uses MySQL configuration
+- Sets up MySQL connection
 
-#### `just run-postgres`
+### `just run-postgres`
 
 **Purpose:** Run with PostgreSQL database
 **What it does:**
 
-- Starts application with PostgreSQL database
-- Uses `spring.profiles.active=postgres`
-- Requires PostgreSQL server running
-- Uses configuration from `application-postgres.properties`
+- Starts application with PostgreSQL profile
+- Connects to PostgreSQL database
+- Uses PostgreSQL configuration
+- Sets up PostgreSQL connection
 
-### Code Quality & Coverage Commands
+### `just coverage`
 
-#### `just coverage`
-
-**Purpose:** Run code coverage analysis
+**Purpose:** Run coverage analysis
 **What it does:**
 
-- Runs tests with JaCoCo coverage
+- Executes tests with coverage
 - Generates coverage report
-- Creates HTML report at `target/site/jacoco/index.html`
-- Shows line, branch, and method coverage
+- Shows coverage statistics
+- Identifies uncovered areas
 
-#### `just validate-format`
+### `just validate-format`
 
 **Purpose:** Validate code formatting
 **What it does:**
 
-- Checks if code follows Spring Java Format
-- Validates without making changes
-- Reports formatting violations
-- Ensures consistent code style
+- Checks code formatting
+- Validates style compliance
+- Reports formatting issues
+- Ensures consistency
 
-#### `just compile-css`
+### `just compile-css`
 
-**Purpose:** Compile SCSS to CSS
+**Purpose:** Compile CSS assets
 **What it does:**
 
-- Compiles SCSS files using LibSass
-- Processes Bootstrap SCSS files
-- Generates compiled CSS files
-- Uses Maven profile `-Pcss`
+- Compiles Sass/SCSS files
+- Generates CSS output
+- Optimizes stylesheets
+- Processes CSS assets
 
-### Native & Development Commands
-
-#### `just native-build`
+### `just native-build`
 
 **Purpose:** Build native image
 **What it does:**
 
-- Creates GraalVM native image
-- Uses Spring Boot native support
-- Generates optimized executable
-- Requires GraalVM installation
+- Builds GraalVM native image
+- Creates executable binary
+- Optimizes for performance
+- Reduces startup time
 
-#### `just dev-run`
+### `just dev-run`
 
-**Purpose:** Run with development tools
+**Purpose:** Run in development mode
 **What it does:**
 
-- Enables Spring Boot DevTools
-- Enables automatic restart on changes
-- Provides development-friendly features
-- Uses `spring.devtools.restart.enabled=true`
+- Starts with development profile
+- Enables hot reload
+- Sets up debugging
+- Configures development tools
 
-### Container & Docker Commands
-
-#### `just test-containers`
+### `just test-containers`
 
 **Purpose:** Run tests with containers
 **What it does:**
 
-- Runs tests using Testcontainers
-- Spins up database containers for tests
-- Ensures isolated test environment
-- Uses Docker for test databases
+- Uses Testcontainers for tests
+- Spins up database containers
+- Runs integration tests
+- Cleans up containers
 
-#### `just docker-compose-up`
+### `just docker-compose-up`
 
 **Purpose:** Start Docker services
 **What it does:**
 
-- Starts services defined in `docker-compose.yml`
-- Launches database containers
+- Starts Docker Compose services
+- Spins up database containers
 - Sets up development environment
-- Runs in detached mode (`-d`)
+- Configures services
 
-#### `just docker-compose-down`
+### `just docker-compose-down`
 
 **Purpose:** Stop Docker services
 **What it does:**
 
-- Stops all running containers
-- Removes containers and networks
-- Cleans up Docker resources
-- Shuts down development environment
+- Stops Docker Compose services
+- Removes containers
+- Cleans up resources
+- Resets environment
 
-### Application Info Commands
-
-#### `just show-props`
+### `just show-props`
 
 **Purpose:** Show application properties
 **What it does:**
 
-- Displays Spring Boot configuration
-- Shows active profiles and properties
-- Runs with `--debug` flag
-- Shows first 20 debug lines
+- Displays application properties
+- Shows configuration values
+- Reports environment settings
+- Lists system properties
 
-#### `just deps-tree`
+### `just deps-tree`
 
 **Purpose:** Show dependency tree
 **What it does:**
 
-- Displays Maven dependency tree
-- Shows all project dependencies
-- Helps identify dependency conflicts
-- Useful for dependency analysis
+- Displays dependency hierarchy
+- Shows transitive dependencies
+- Reports dependency conflicts
+- Lists all dependencies
 
-#### `just app-info`
+### `just app-info`
 
-**Purpose:** Get application information
+**Purpose:** Show application information
 **What it does:**
 
-- Shows application startup info
-- Displays Spring Boot banner
-- Shows active profiles
-- Runs with `--info` flag
+- Displays application details
+- Shows version information
+- Reports build details
+- Lists application features
+
+---
+
+## 🗄️ Database Management Commands
+
+These commands manage database operations and connections.
+
+### `just db-init-h2`
+
+**Purpose:** Initialize H2 database
+**What it does:**
+
+- Creates H2 database schema
+- Initializes tables
+- Sets up data
+- Configures H2 connection
+
+### `just db-init-mysql`
+
+**Purpose:** Initialize MySQL database
+**What it does:**
+
+- Creates MySQL database schema
+- Initializes tables
+- Sets up data
+- Configures MySQL connection
+
+### `just db-init-postgres`
+
+**Purpose:** Initialize PostgreSQL database
+**What it does:**
+
+- Creates PostgreSQL database schema
+- Initializes tables
+- Sets up data
+- Configures PostgreSQL connection
+
+### `just db-reset-h2`
+
+**Purpose:** Reset H2 database
+**What it does:**
+
+- Drops existing schema
+- Recreates database
+- Initializes fresh data
+- Resets H2 state
+
+### `just db-validate`
+
+**Purpose:** Validate database connection
+**What it does:**
+
+- Tests database connectivity
+- Validates connection settings
+- Reports connection status
+- Ensures database availability
+
+### `just db-schema`
+
+**Purpose:** Show database schema
+**What it does:**
+
+- Displays database structure
+- Shows table definitions
+- Reports schema information
+- Lists database objects
+
+---
+
+## 💻 System Information Commands
+
+These commands provide system and environment information.
+
+### `just java-version`
+
+**Purpose:** Show Java version
+**What it does:**
+
+- Displays Java version information
+- Shows JVM details
+- Reports Java configuration
+- Lists Java features
+
+### `just maven-version`
+
+**Purpose:** Show Maven version
+**What it does:**
+
+- Displays Maven version information
+- Shows Maven configuration
+- Reports Maven settings
+- Lists Maven features
+
+### `just git-status`
+
+**Purpose:** Show Git status
+**What it does:**
+
+- Displays Git repository status
+- Shows branch information
+- Reports file changes
+- Lists commit history
+
+### `just find-java`
+
+**Purpose:** Find Java installations
+**What it does:**
+
+- Locates Java installations
+- Shows Java paths
+- Reports Java versions
+- Lists Java locations
+
+### `just count-lines`
+
+**Purpose:** Count lines of code
+**What it does:**
+
+- Counts total lines of code
+- Shows file statistics
+- Reports code metrics
+- Lists file counts
 
 ---
 
 ## 📦 Maven Commands
 
-Direct Maven commands for fine-grained control.
+These commands provide direct access to Maven operations.
 
 ### `just mvn-clean`
 
 **Purpose:** Maven clean
-**What it does:** Removes target directory and compiled files
+**What it does:**
+
+- Runs `mvn clean`
+- Removes target directory
+- Cleans build artifacts
+- Resets build state
 
 ### `just mvn-compile`
 
 **Purpose:** Maven compile
-**What it does:** Compiles source code to target directory
+**What it does:**
+
+- Runs `mvn compile`
+- Compiles source code
+- Generates classes
+- Validates compilation
 
 ### `just mvn-test`
 
 **Purpose:** Maven test
-**What it does:** Runs all tests in the project
+**What it does:**
+
+- Runs `mvn test`
+- Executes unit tests
+- Generates test reports
+- Validates test results
 
 ### `just mvn-package`
 
 **Purpose:** Maven package
-**What it does:** Creates JAR file in target directory
+**What it does:**
+
+- Runs `mvn package`
+- Creates JAR file
+- Generates artifacts
+- Prepares for deployment
 
 ### `just mvn-install`
 
 **Purpose:** Maven install
-**What it does:** Installs JAR to local Maven repository
+**What it does:**
+
+- Runs `mvn install`
+- Installs to local repository
+- Generates artifacts
+- Updates repository
 
 ### `just mvn-spring-boot-run`
 
-**Purpose:** Run with Spring Boot Maven plugin
-**What it does:** Starts application using Spring Boot Maven plugin
+**Purpose:** Maven Spring Boot run
+**What it does:**
+
+- Runs `mvn spring-boot:run`
+- Starts Spring Boot application
+- Enables development mode
+- Sets up application
 
 ---
 
-## 🔧 Utility Commands
+## 🛠️ Utility Commands
 
-Helper commands for development and debugging.
+These commands provide utility functions and helpers.
 
 ### `just detect`
 
 **Purpose:** Detect project type
 **What it does:**
 
-- Identifies build system (Maven/Gradle)
-- Shows available commands
+- Identifies build system
 - Detects project structure
-- Provides project information
+- Reports project type
+- Shows configuration
+
+### `just dev-setup`
+
+**Purpose:** Setup development environment
+**What it does:**
+
+- Configures development tools
+- Sets up environment
+- Installs dependencies
+- Prepares workspace
+
+### `just dev-logs`
+
+**Purpose:** Show development logs
+**What it does:**
+
+- Displays application logs
+- Shows error messages
+- Reports debug information
+- Lists log entries
+
+### `just help`
+
+**Purpose:** Show help information
+**What it does:**
+
+- Displays available commands
+- Shows command descriptions
+- Provides usage examples
+- Lists command options
 
 ### `just status`
 
 **Purpose:** Show project status
 **What it does:**
 
-- Checks if application is built
-- Verifies test execution status
-- Shows coverage report availability
-- Provides comprehensive project status
+- Displays project information
+- Shows build status
+- Reports environment details
+- Lists active processes
 
 ### `just version`
 
@@ -479,113 +645,104 @@ Helper commands for development and debugging.
 **What it does:**
 
 - Displays application version
-- Shows Java version
-- Shows Maven version
-- Shows Git information
+- Shows dependency versions
+- Reports build information
+- Lists version details
 
 ### `just env-info`
 
 **Purpose:** Show environment information
 **What it does:**
 
-- Displays operating system info
-- Shows Java environment details
-- Shows Maven environment details
-- Shows system resources (memory, disk)
+- Displays environment variables
+- Shows system configuration
+- Reports path settings
+- Lists environment details
 
 ### `just cleanup`
 
-**Purpose:** Cleanup temporary files
+**Purpose:** Clean up resources
 **What it does:**
 
-- Removes temporary build files
-- Cleans up log files
-- Removes Maven timing files
+- Removes temporary files
+- Cleans build artifacts
 - Frees up disk space
-
-### `just dev-setup`
-
-**Purpose:** Setup development environment
-**What it does:**
-
-- Checks Java version
-- Checks Maven version
-- Verifies environment setup
-- Shows development tools status
-
-### `just dev-logs`
-
-**Purpose:** Show application logs
-**What it does:**
-
-- Displays recent application logs
-- Shows real-time log output
-- Helps with debugging
-- Monitors application status
-
-### `just help`
-
-**Purpose:** Show help information
-**What it does:**
-
-- Lists all available commands
-- Shows command categories
-- Provides usage information
-- Displays command descriptions
+- Resets environment
 
 ---
 
 ## 📊 Command Categories Summary
 
-| Category                 | Commands | Description                                     |
-| ------------------------ | -------- | ----------------------------------------------- |
-| **Universal**            | 7        | Cross-platform build and deployment commands    |
-| **CI/CD Pipeline**       | 3        | Comprehensive CI/CD workflows and quality gates |
-| **Development Workflow** | 4        | Development environment management              |
-| **Reporting**            | 3        | Comprehensive reporting and analytics           |
-| **Spring-Specific**      | 18       | Spring Boot specific features and tools         |
-| **Maven**                | 6        | Direct Maven plugin commands                    |
-| **Utility**              | 8        | Development and debugging helpers               |
-| **Total**                | **55**   | Complete command set                            |
+### **Total Commands: 128**
 
-### Command Distribution
+#### **Universal Commands (7)**
 
-- **Actuator Commands:** 4 (Health, Info, Metrics, Environment)
-- **Database Commands:** 3 (H2, MySQL, PostgreSQL)
-- **Quality Commands:** 3 (Coverage, Format Validation, CSS Compilation)
-- **Development Commands:** 2 (Native Build, Dev Tools)
-- **Container Commands:** 3 (Test Containers, Docker Compose Up/Down)
-- **Info Commands:** 3 (Properties, Dependencies, Application Info)
-- **CI/CD Commands:** 3 (CI Build, CI Test, Quality Gate)
-- **Workflow Commands:** 4 (Dev Start/Stop/Restart/Status)
-- **Reporting Commands:** 3 (Coverage, Quality, Test Reports)
-- **Utility Commands:** 8 (Status, Version, Environment, Cleanup, etc.)
+- `build`, `test`, `clean`, `run`, `lint`, `format`, `deploy`
+
+#### **CI/CD Pipeline Commands (3)**
+
+- `ci-build`, `ci-test`, `quality-gate`
+
+#### **Development Workflow Commands (4)**
+
+- `dev-start`, `dev-stop`, `dev-restart`, `dev-status`
+
+#### **Reporting Commands (3)**
+
+- `report-coverage`, `report-quality`, `report-test`
+
+#### **Spring-Specific Commands (18)**
+
+- Actuator: `actuator-health`, `actuator-info`, `actuator-metrics`, `actuator-env`
+- Database: `run-h2`, `run-mysql`, `run-postgres`
+- Quality: `coverage`, `validate-format`, `compile-css`
+- Native: `native-build`, `dev-run`
+- Container: `test-containers`, `docker-compose-up`, `docker-compose-down`
+- Info: `show-props`, `deps-tree`, `app-info`
+
+#### **Database Management Commands (6)**
+
+- `db-init-h2`, `db-init-mysql`, `db-init-postgres`
+- `db-reset-h2`, `db-validate`, `db-schema`
+
+#### **System Information Commands (5)**
+
+- `java-version`, `maven-version`, `git-status`, `find-java`, `count-lines`
+
+#### **Maven Commands (6)**
+
+- `mvn-clean`, `mvn-compile`, `mvn-test`, `mvn-package`, `mvn-install`, `mvn-spring-boot-run`
+
+#### **Utility Commands (8)**
+
+- `detect`, `dev-setup`, `dev-logs`, `help`, `status`, `version`, `env-info`, `cleanup`
 
 ---
 
 ## 🚀 Quick Start Examples
 
-### Basic Development Workflow
+### **Basic Development Workflow**
 
 ```bash
 # Setup and build
 just dev-setup
 just build
 
-# Run with default database
-just run-h2
+# Run tests and quality checks
+just test
+just lint
 
-# Check health
-just actuator-health
+# Start development
+just dev-run
 ```
 
-### CI/CD Pipeline
+### **CI/CD Pipeline**
 
 ```bash
-# Full CI build with validation
+# Full CI build
 just ci-build
 
-# Quality gate check
+# Quality gate
 just quality-gate
 
 # Generate reports
@@ -593,83 +750,37 @@ just report-coverage
 just report-quality
 ```
 
-### Development Environment Management
+### **Database Operations**
 
 ```bash
-# Start development environment
-just dev-start
+# Initialize database
+just db-init-h2
+
+# Validate connection
+just db-validate
+
+# Run with specific database
+just run-postgres
+```
+
+### **System Information**
+
+```bash
+# Check versions
+just java-version
+just maven-version
 
 # Check status
-just dev-status
-
-# Restart if needed
-just dev-restart
-
-# Stop when done
-just dev-stop
-```
-
-### Testing and Quality
-
-```bash
-# Run tests
-just test
-
-# Check code coverage
-just coverage
-
-# Validate formatting
-just validate-format
-```
-
-### Database Switching
-
-```bash
-# Run with different databases
-just run-h2      # In-memory database
-just run-mysql   # MySQL database
-just run-postgres # PostgreSQL database
-```
-
-### Container Development
-
-```bash
-# Start services
-just docker-compose-up
-
-# Run tests with containers
-just test-containers
-
-# Stop services
-just docker-compose-down
-```
-
-### Project Monitoring
-
-```bash
-# Check project status
 just status
-
-# Show version info
-just version
-
-# Environment information
-just env-info
+just git-status
 ```
 
 ---
 
 ## 📝 Notes
 
-- All commands use Java 24 and Maven 3.9.11
-- Commands are configured for Windows environment
-- Spring Boot Actuator endpoints require application to be running
-- Some commands may fail if JAR file is in use by another process
-- Docker commands require Docker to be installed and running
-- CI/CD commands provide comprehensive validation workflows
-- Development workflow commands manage environment lifecycle
-- Reporting commands generate detailed analytics and insights
-
----
-
-_This documentation covers all 55 Just commands available in the Spring PetClinic project. Each command is designed to simplify common development tasks and provide a consistent interface across different build systems. The pipeline demonstrates comprehensive CI/CD capabilities, development workflow management, and extensive reporting capabilities._
+- All commands use existing tools and dependencies
+- No third-party installations required
+- Commands work with both Maven and Gradle projects
+- Comprehensive coverage of development, testing, and deployment workflows
+- Designed for multi-language CI/CD pipeline architecture
