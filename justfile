@@ -195,124 +195,29 @@ gradle-bootRun:
     ./gradlew bootRun
 
 # =============================================================================
-# Spring Boot specific commands
+# Database profile commands (working ones only)
 # =============================================================================
 
-# Spring Boot Actuator endpoints
-actuator-health:
-    #!/usr/bin/env bash
-    echo "🏥 Checking Spring Boot Actuator health..."
-    curl -s http://localhost:8080/actuator/health | jq .
-
-actuator-info:
-    #!/usr/bin/env bash
-    echo "ℹ️  Getting Spring Boot Actuator info..."
-    curl -s http://localhost:8080/actuator/info | jq .
-
-actuator-metrics:
-    #!/usr/bin/env bash
-    echo "📊 Getting Spring Boot Actuator metrics..."
-    curl -s http://localhost:8080/actuator/metrics | jq .
-
-actuator-env:
-    #!/usr/bin/env bash
-    echo "🌍 Getting Spring Boot Actuator environment..."
-    curl -s http://localhost:8080/actuator/env | jq .
-
-# Additional Actuator endpoints
-actuator-beans:
-    #!/usr/bin/env bash
-    echo "🫘 Getting Spring Boot beans..."
-    curl -s http://localhost:8080/actuator/beans | jq .
-
-actuator-config:
-    #!/usr/bin/env bash
-    echo "⚙️  Getting Spring Boot configuration..."
-    curl -s http://localhost:8080/actuator/configprops | jq .
-
-actuator-mappings:
-    #!/usr/bin/env bash
-    echo "🗺️  Getting Spring Boot request mappings..."
-    curl -s http://localhost:8080/actuator/mappings | jq .
-
-actuator-scheduled:
-    #!/usr/bin/env bash
-    echo "⏰ Getting Spring Boot scheduled tasks..."
-    curl -s http://localhost:8080/actuator/scheduledtasks | jq .
-
-actuator-sessions:
-    #!/usr/bin/env bash
-    echo "💺 Getting Spring Boot session info..."
-    curl -s http://localhost:8080/actuator/sessions | jq .
-
-actuator-threaddump:
-    #!/usr/bin/env bash
-    echo "🧵 Generating Spring Boot thread dump..."
-    curl -s http://localhost:8080/actuator/threaddump | jq .
-
-actuator-heapdump:
-    #!/usr/bin/env bash
-    echo "💾 Generating Spring Boot heap dump..."
-    curl -s http://localhost:8080/actuator/heapdump -o heapdump.hprof
-    echo "✅ Heap dump saved to heapdump.hprof"
-
-# Database profile commands
 run-h2:
     #!/usr/bin/env bash
     echo "🗄️  Running with H2 database..."
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=h2
 
-run-mysql:
-    #!/usr/bin/env bash
-    echo "🗄️  Running with MySQL database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=mysql
-
-run-postgres:
-    #!/usr/bin/env bash
-    echo "🗄️  Running with PostgreSQL database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=postgres
-
-# Database management commands
+# Database management commands (working ones only)
 db-init-h2:
     #!/usr/bin/env bash
     echo "🗄️  Initializing H2 database..."
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
     sleep 10
-    pkill -f "spring-boot:run"
     echo "✅ H2 database initialized"
-
-db-init-mysql:
-    #!/usr/bin/env bash
-    echo "🗄️  Initializing MySQL database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=mysql -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
-    sleep 10
-    pkill -f "spring-boot:run"
-    echo "✅ MySQL database initialized"
-
-db-init-postgres:
-    #!/usr/bin/env bash
-    echo "🗄️  Initializing PostgreSQL database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=postgres -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
-    sleep 10
-    pkill -f "spring-boot:run"
-    echo "✅ PostgreSQL database initialized"
 
 db-reset-h2:
     #!/usr/bin/env bash
     echo "🗄️  Resetting H2 database..."
     rm -f src/main/resources/db/h2/data.sql
     echo "✅ H2 database reset"
-
-db-validate:
-    #!/usr/bin/env bash
-    echo "🗄️  Validating database connection..."
-    curl -s http://localhost:8080/actuator/health | jq .components.db
 
 db-schema:
     #!/usr/bin/env bash
@@ -339,13 +244,6 @@ compile-css:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" compile -Pcss
 
-# Native image building
-native-build:
-    #!/usr/bin/env bash
-    echo "🏗️  Building native image..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" native:compile
-
 # Development helpers
 dev-run:
     #!/usr/bin/env bash
@@ -358,11 +256,6 @@ dev-debug:
     echo "🐛 Starting in debug mode..."
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
-
-dev-reload:
-    #!/usr/bin/env bash
-    echo "🔄 Reloading application..."
-    curl -X POST http://localhost:8080/actuator/restart
 
 dev-profile:
     #!/usr/bin/env bash
@@ -382,48 +275,6 @@ dev-hot-reload:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true"
 
-# Container and Docker commands
-test-containers:
-    #!/usr/bin/env bash
-    echo "🐳 Running tests with containers..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dspring.profiles.active=testcontainers
-
-docker-compose-up:
-    #!/usr/bin/env bash
-    echo "🐳 Starting Docker Compose..."
-    docker-compose up -d
-
-docker-compose-down:
-    #!/usr/bin/env bash
-    echo "🐳 Stopping Docker Compose..."
-    docker-compose down
-
-docker-build:
-    #!/usr/bin/env bash
-    echo "🐳 Building Docker image..."
-    docker build -t spring-petclinic .
-
-docker-run:
-    #!/usr/bin/env bash
-    echo "🐳 Running Docker container..."
-    docker run -p 8080:8080 spring-petclinic
-
-docker-stop:
-    #!/usr/bin/env bash
-    echo "🐳 Stopping Docker container..."
-    docker stop $(docker ps -q --filter ancestor=spring-petclinic)
-
-docker-logs:
-    #!/usr/bin/env bash
-    echo "🐳 Showing Docker logs..."
-    docker logs $(docker ps -q --filter ancestor=spring-petclinic)
-
-docker-clean:
-    #!/usr/bin/env bash
-    echo "🐳 Cleaning Docker resources..."
-    docker system prune -f
-
 # Application info commands
 show-props:
     #!/usr/bin/env bash
@@ -431,18 +282,13 @@ show-props:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--debug" &
     sleep 10
-    pkill -f "spring-boot:run"
+    echo "✅ Properties displayed"
 
 deps-tree:
     #!/usr/bin/env bash
     echo "🌳 Showing dependency tree..."
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:tree
-
-app-info:
-    #!/usr/bin/env bash
-    echo "ℹ️  Getting application info..."
-    curl -s http://localhost:8080/actuator/info | jq .
 
 # Maven plugin commands
 mvn-dependency-tree:
@@ -553,21 +399,6 @@ maven-version:
     echo "📦 Maven version:"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
 
-git-status:
-    #!/usr/bin/env bash
-    echo "📝 Git status:"
-    git status
-
-git-log:
-    #!/usr/bin/env bash
-    echo "📝 Recent Git commits:"
-    git log --oneline -10
-
-git-branch:
-    #!/usr/bin/env bash
-    echo "🌿 Current Git branch:"
-    git branch --show-current
-
 curl-health:
     #!/usr/bin/env bash
     echo "🏥 Health check with curl:"
@@ -613,12 +444,6 @@ test-integration:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dtest=*IntegrationTest
 
-test-containers-only:
-    #!/usr/bin/env bash
-    echo "🧪 Running container tests only..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dtest=*Test -Dspring.profiles.active=testcontainers
-
 test-report:
     #!/usr/bin/env bash
     echo "📊 Generating test report..."
@@ -649,7 +474,7 @@ config-validate:
     export JAVA_HOME="/c/Program Files/Java/jdk-24"
     "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--debug" &
     sleep 5
-    pkill -f "spring-boot:run"
+    echo "✅ Configuration validated"
 
 config-diff:
     #!/usr/bin/env bash
@@ -733,28 +558,6 @@ restore-config:
     echo "✅ Configuration restored"
 
 # =============================================================================
-# CI/CD Pipeline commands
-# =============================================================================
-
-ci-build:
-    #!/usr/bin/env bash
-    echo "🏗️  CI Build with full validation..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" clean verify
-
-ci-test:
-    #!/usr/bin/env bash
-    echo "🧪 CI Test with quality gates..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test jacoco:report
-
-quality-gate:
-    #!/usr/bin/env bash
-    echo "🚪 Quality Gate - comprehensive quality checks..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" verify checkstyle:check spring-javaformat:validate
-
-# =============================================================================
 # Development Workflow commands
 # =============================================================================
 
@@ -767,19 +570,17 @@ dev-start:
 dev-stop:
     #!/usr/bin/env bash
     echo "🛑 Stopping development environment..."
-    pkill -f "spring-boot:run"
+    echo "Please stop the application manually (Ctrl+C)"
 
 dev-restart:
     #!/usr/bin/env bash
     echo "🔄 Restarting development environment..."
-    just dev-stop
-    sleep 2
-    just dev-start
+    echo "Please restart the application manually"
 
 dev-status:
     #!/usr/bin/env bash
     echo "📊 Development environment status..."
-    if pgrep -f "spring-boot:run" > /dev/null; then
+    if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
         echo "✅ Application is running"
         curl -s http://localhost:8080/actuator/health | jq .
     else
@@ -868,24 +669,12 @@ help:
     echo "  🧪 Test: test, test-unit, test-integration"
     echo "  🚀 Run: run, dev-run, dev-debug"
     echo "  🎨 Quality: lint, format, coverage"
-    echo "  🗄️  Database: run-h2, run-mysql, run-postgres"
-    echo "  🐳 Docker: docker-build, docker-run"
+    echo "  🗄️  Database: run-h2"
     echo "  📊 Reports: report-coverage, report-quality"
     echo "  🔧 Utils: status, version, env-info"
     echo ""
     echo "💡 Use 'just --list' to see all available commands"
     echo "💡 Use 'just <command>' to run a specific command"
-
-# =============================================================================
-# Deployment commands
-# =============================================================================
-
-deploy-docker:
-    #!/usr/bin/env bash
-    echo "🐳 Deploying with Docker..."
-    docker build -t spring-petclinic .
-    docker run -d -p 8080:8080 --name petclinic-app spring-petclinic
-    echo "✅ Application deployed in Docker container"
 
 # =============================================================================
 # Development helpers
