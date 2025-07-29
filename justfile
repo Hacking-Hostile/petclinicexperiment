@@ -5,14 +5,31 @@
 default:
     @just --list
 
+# Helper function to get Maven command
+get-mvn-cmd:
+    #!/usr/bin/env bash
+    if command -v mvn &> /dev/null; then
+        echo "mvn"
+    elif [ -f "./mvnw" ]; then
+        echo "./mvnw"
+    else
+        echo "mvn"
+    fi
+
 # Universal build command
 build:
     #!/usr/bin/env bash
     echo "🔨 Building Spring PetClinic application..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Detected Maven project"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" clean package -DskipTests
+        if command -v mvn &> /dev/null; then
+            mvn clean package -DskipTests
+        elif [ -f "./mvnw" ]; then
+            ./mvnw clean package -DskipTests
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Build completed successfully!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Detected Gradle project"
@@ -27,10 +44,16 @@ build:
 test:
     #!/usr/bin/env bash
     echo "🧪 Running tests..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven tests"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test
+        if command -v mvn &> /dev/null; then
+            mvn test
+        elif [ -f "./mvnw" ]; then
+            ./mvnw test
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Tests completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle tests"
@@ -45,10 +68,16 @@ test:
 clean:
     #!/usr/bin/env bash
     echo "🧹 Cleaning project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Cleaning Maven project"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" clean
+        if command -v mvn &> /dev/null; then
+            mvn clean
+        elif [ -f "./mvnw" ]; then
+            ./mvnw clean
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Clean completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Cleaning Gradle project"
@@ -63,13 +92,19 @@ clean:
 run:
     #!/usr/bin/env bash
     echo "🚀 Starting Spring PetClinic application..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "target/spring-petclinic-*.jar" ]; then
         echo "📦 Running JAR file"
-        "/c/Program Files/Java/jdk-24/bin/java.exe" -jar target/spring-petclinic-*.jar
+        java -jar target/spring-petclinic-*.jar
     elif [ -f "pom.xml" ]; then
         echo "📦 Running with Maven Spring Boot plugin"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run
+        if command -v mvn &> /dev/null; then
+            mvn spring-boot:run
+        elif [ -f "./mvnw" ]; then
+            ./mvnw spring-boot:run
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
     elif [ -f "build.gradle" ]; then
         echo "📦 Running with Gradle Spring Boot plugin"
         ./gradlew bootRun
@@ -82,10 +117,16 @@ run:
 lint:
     #!/usr/bin/env bash
     echo "🔍 Running code quality checks..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven checkstyle"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:check
+        if command -v mvn &> /dev/null; then
+            mvn checkstyle:check
+        elif [ -f "./mvnw" ]; then
+            ./mvnw checkstyle:check
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Lint completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle checkstyle"
@@ -99,10 +140,16 @@ lint:
 format:
     #!/usr/bin/env bash
     echo "🎨 Formatting code..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Running Spring Java Format"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:apply
+        if command -v mvn &> /dev/null; then
+            mvn spring-javaformat:apply
+        elif [ -f "./mvnw" ]; then
+            ./mvnw spring-javaformat:apply
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Format completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle format"
@@ -116,10 +163,16 @@ format:
 deploy:
     #!/usr/bin/env bash
     echo "🚀 Deploying application..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
     if [ -f "pom.xml" ]; then
         echo "📦 Deploying with Maven"
-        "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" deploy
+        if command -v mvn &> /dev/null; then
+            mvn deploy
+        elif [ -f "./mvnw" ]; then
+            ./mvnw deploy
+        else
+            echo "❌ Maven not found and no wrapper available"
+            exit 1
+        fi
         echo "✅ Deploy completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Deploying with Gradle"
@@ -137,38 +190,74 @@ deploy:
 mvn-clean:
     #!/usr/bin/env bash
     echo "🧹 Cleaning Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" clean
+    if command -v mvn &> /dev/null; then
+        mvn clean
+    elif [ -f "./mvnw" ]; then
+        ./mvnw clean
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-compile:
     #!/usr/bin/env bash
     echo "🔨 Compiling Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" compile
+    if command -v mvn &> /dev/null; then
+        mvn compile
+    elif [ -f "./mvnw" ]; then
+        ./mvnw compile
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-test:
     #!/usr/bin/env bash
     echo "🧪 Running Maven tests..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test
+    if command -v mvn &> /dev/null; then
+        mvn test
+    elif [ -f "./mvnw" ]; then
+        ./mvnw test
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-package:
     #!/usr/bin/env bash
     echo "📦 Packaging Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" package
+    if command -v mvn &> /dev/null; then
+        mvn package
+    elif [ -f "./mvnw" ]; then
+        ./mvnw package
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-install:
     #!/usr/bin/env bash
     echo "📦 Installing Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" install
+    if command -v mvn &> /dev/null; then
+        mvn install
+    elif [ -f "./mvnw" ]; then
+        ./mvnw install
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-spring-boot-run:
     #!/usr/bin/env bash
     echo "🚀 Running Spring Boot with Maven..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # =============================================================================
 # Gradle-specific commands (if needed)
@@ -201,15 +290,27 @@ gradle-bootRun:
 run-h2:
     #!/usr/bin/env bash
     echo "🗄️  Running with H2 database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=h2
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.profiles=h2
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Database management commands (working ones only)
 db-init-h2:
     #!/usr/bin/env bash
     echo "🗄️  Initializing H2 database..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     sleep 10
     echo "✅ H2 database initialized"
 
@@ -228,135 +329,261 @@ db-schema:
 coverage:
     #!/usr/bin/env bash
     echo "📊 Generating code coverage report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" jacoco:report
+    if command -v mvn &> /dev/null; then
+        mvn jacoco:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw jacoco:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     echo "✅ Coverage report generated in target/site/jacoco/"
 
 validate-format:
     #!/usr/bin/env bash
     echo "🎨 Validating code format..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:validate
+    if command -v mvn &> /dev/null; then
+        mvn spring-javaformat:validate
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-javaformat:validate
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 compile-css:
     #!/usr/bin/env bash
     echo "🎨 Compiling CSS..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" compile -Pcss
+    if command -v mvn &> /dev/null; then
+        mvn compile -Pcss
+    elif [ -f "./mvnw" ]; then
+        ./mvnw compile -Pcss
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Development helpers
 dev-run:
     #!/usr/bin/env bash
     echo "🚀 Running in development mode..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 dev-debug:
     #!/usr/bin/env bash
     echo "🐛 Starting in debug mode..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 dev-profile:
     #!/usr/bin/env bash
     echo "🎭 Running with development profile..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.profiles=dev
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.profiles=dev
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 dev-watch:
     #!/usr/bin/env bash
     echo "👀 Watching for changes..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true"
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 dev-hot-reload:
     #!/usr/bin/env bash
     echo "🔥 Enabling hot reload..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true"
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Application info commands
 show-props:
     #!/usr/bin/env bash
     echo "⚙️  Showing application properties..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     sleep 10
     echo "✅ Properties displayed"
 
 deps-tree:
     #!/usr/bin/env bash
     echo "🌳 Showing dependency tree..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:tree
+    if command -v mvn &> /dev/null; then
+        mvn dependency:tree
+    elif [ -f "./mvnw" ]; then
+        ./mvnw dependency:tree
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Maven plugin commands
 mvn-dependency-tree:
     #!/usr/bin/env bash
     echo "🌳 Showing Maven dependency tree..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:tree
+    if command -v mvn &> /dev/null; then
+        mvn dependency:tree
+    elif [ -f "./mvnw" ]; then
+        ./mvnw dependency:tree
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-dependency-analyze:
     #!/usr/bin/env bash
     echo "🔍 Analyzing Maven dependencies..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:analyze
+    if command -v mvn &> /dev/null; then
+        mvn dependency:analyze
+    elif [ -f "./mvnw" ]; then
+        ./mvnw dependency:analyze
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-surefire-report:
     #!/usr/bin/env bash
     echo "📊 Generating Maven Surefire report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" surefire-report:report
+    if command -v mvn &> /dev/null; then
+        mvn surefire-report:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw surefire-report:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-site:
     #!/usr/bin/env bash
     echo "🌐 Generating Maven site..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" site
+    if command -v mvn &> /dev/null; then
+        mvn site
+    elif [ -f "./mvnw" ]; then
+        ./mvnw site
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-validate:
     #!/usr/bin/env bash
     echo "✅ Validating Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" validate
+    if command -v mvn &> /dev/null; then
+        mvn validate
+    elif [ -f "./mvnw" ]; then
+        ./mvnw validate
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 mvn-verify:
     #!/usr/bin/env bash
     echo "✅ Verifying Maven project..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" verify
+    if command -v mvn &> /dev/null; then
+        mvn verify
+    elif [ -f "./mvnw" ]; then
+        ./mvnw verify
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Code quality commands
 checkstyle-report:
     #!/usr/bin/env bash
     echo "📊 Generating Checkstyle report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:checkstyle
+    if command -v mvn &> /dev/null; then
+        mvn checkstyle:checkstyle
+    elif [ -f "./mvnw" ]; then
+        ./mvnw checkstyle:checkstyle
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 format-check:
     #!/usr/bin/env bash
     echo "🎨 Checking code format..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:validate
+    if command -v mvn &> /dev/null; then
+        mvn spring-javaformat:validate
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-javaformat:validate
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 format-apply:
     #!/usr/bin/env bash
     echo "🎨 Applying code format..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-javaformat:apply
+    if command -v mvn &> /dev/null; then
+        mvn spring-javaformat:apply
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-javaformat:apply
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 nohttp-check:
     #!/usr/bin/env bash
     echo "🔒 Checking for HTTP URLs..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    if command -v mvn &> /dev/null; then
+        mvn checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    elif [ -f "./mvnw" ]; then
+        ./mvnw checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 cyclonedx-report:
     #!/usr/bin/env bash
     echo "📋 Generating CycloneDX SBOM report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" cyclonedx:makeAggregateBom
+    if command -v mvn &> /dev/null; then
+        mvn cyclonedx:makeAggregateBom
+    elif [ -f "./mvnw" ]; then
+        ./mvnw cyclonedx:makeAggregateBom
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Build and package commands
 jar-info:
@@ -379,25 +606,44 @@ jar-extract:
 war-package:
     #!/usr/bin/env bash
     echo "📦 Packaging as WAR..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" package -Dpackaging=war
+    if command -v mvn &> /dev/null; then
+        mvn package -Dpackaging=war
+    elif [ -f "./mvnw" ]; then
+        ./mvnw package -Dpackaging=war
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 fat-jar:
     #!/usr/bin/env bash
     echo "📦 Creating fat JAR..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" package -Dspring-boot.repackage.enabled=true
+    if command -v mvn &> /dev/null; then
+        mvn package -Dspring-boot.repackage.enabled=true
+    elif [ -f "./mvnw" ]; then
+        ./mvnw package -Dspring-boot.repackage.enabled=true
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # System and environment commands
 java-version:
     #!/usr/bin/env bash
     echo "☕ Java version:"
-    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    java -version
 
 maven-version:
     #!/usr/bin/env bash
     echo "📦 Maven version:"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    if command -v mvn &> /dev/null; then
+        mvn -version
+    elif [ -f "./mvnw" ]; then
+        ./mvnw -version
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 curl-health:
     #!/usr/bin/env bash
@@ -428,33 +674,63 @@ count-lines:
 list-deps:
     #!/usr/bin/env bash
     echo "📦 Listing dependencies:"
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:list
+    if command -v mvn &> /dev/null; then
+        mvn dependency:list
+    elif [ -f "./mvnw" ]; then
+        ./mvnw dependency:list
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Test enhancement commands
 test-unit:
     #!/usr/bin/env bash
     echo "🧪 Running unit tests only..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dtest=*Test
+    if command -v mvn &> /dev/null; then
+        mvn test -Dtest=*Test
+    elif [ -f "./mvnw" ]; then
+        ./mvnw test -Dtest=*Test
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 test-integration:
     #!/usr/bin/env bash
     echo "🧪 Running integration tests only..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" test -Dtest=*IntegrationTest
+    if command -v mvn &> /dev/null; then
+        mvn test -Dtest=*IntegrationTest
+    elif [ -f "./mvnw" ]; then
+        ./mvnw test -Dtest=*IntegrationTest
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 test-report:
     #!/usr/bin/env bash
     echo "📊 Generating test report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" surefire-report:report
+    if command -v mvn &> /dev/null; then
+        mvn surefire-report:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw surefire-report:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 test-coverage-html:
     #!/usr/bin/env bash
     echo "📊 Generating HTML coverage report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" jacoco:report
+    if command -v mvn &> /dev/null; then
+        mvn jacoco:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw jacoco:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     echo "✅ HTML report available at target/site/jacoco/index.html"
 
 # Configuration commands
@@ -471,8 +747,14 @@ config-get:
 config-validate:
     #!/usr/bin/env bash
     echo "✅ Validating configuration..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.arguments="--debug" &
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     sleep 5
     echo "✅ Configuration validated"
 
@@ -500,21 +782,39 @@ gc-check:
 performance-profile:
     #!/usr/bin/env bash
     echo "📊 Performance profiling..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run -Dspring-boot.run.jvmArguments="-XX:+UseG1GC -XX:+PrintGC -XX:+PrintGCDetails"
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run -Dspring-boot.run.jvmArguments="-XX:+UseG1GC -XX:+PrintGC -XX:+PrintGCDetails"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-XX:+UseG1GC -XX:+PrintGC -XX:+PrintGCDetails"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 # Security commands
 security-scan-deps:
     #!/usr/bin/env bash
     echo "🔒 Scanning dependencies for vulnerabilities..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" dependency:tree | grep -i vulnerable || echo "No vulnerable dependencies found"
+    if command -v mvn &> /dev/null; then
+        mvn dependency:tree | grep -i vulnerable || echo "No vulnerable dependencies found"
+    elif [ -f "./mvnw" ]; then
+        ./mvnw dependency:tree | grep -i vulnerable || echo "No vulnerable dependencies found"
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 security-check-urls:
     #!/usr/bin/env bash
     echo "🔒 Checking for HTTP URLs (security)..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    if command -v mvn &> /dev/null; then
+        mvn checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    elif [ -f "./mvnw" ]; then
+        ./mvnw checkstyle:check -Dcheckstyle.configLocation=src/checkstyle/nohttp-checkstyle.xml
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 security-validate:
     #!/usr/bin/env bash
@@ -525,8 +825,14 @@ security-validate:
 docs-generate:
     #!/usr/bin/env bash
     echo "📚 Generating documentation..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" site
+    if command -v mvn &> /dev/null; then
+        mvn site
+    elif [ -f "./mvnw" ]; then
+        ./mvnw site
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 docs-validate:
     #!/usr/bin/env bash
@@ -564,8 +870,14 @@ restore-config:
 dev-start:
     #!/usr/bin/env bash
     echo "🚀 Starting development environment..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" spring-boot:run
+    if command -v mvn &> /dev/null; then
+        mvn spring-boot:run
+    elif [ -f "./mvnw" ]; then
+        ./mvnw spring-boot:run
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
 
 dev-stop:
     #!/usr/bin/env bash
@@ -594,22 +906,40 @@ dev-status:
 report-coverage:
     #!/usr/bin/env bash
     echo "📊 Generating comprehensive coverage report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" jacoco:report
+    if command -v mvn &> /dev/null; then
+        mvn jacoco:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw jacoco:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     echo "✅ Coverage report: target/site/jacoco/index.html"
 
 report-quality:
     #!/usr/bin/env bash
     echo "📊 Generating quality report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" checkstyle:checkstyle
+    if command -v mvn &> /dev/null; then
+        mvn checkstyle:checkstyle
+    elif [ -f "./mvnw" ]; then
+        ./mvnw checkstyle:checkstyle
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     echo "✅ Quality report generated"
 
 report-test:
     #!/usr/bin/env bash
     echo "📊 Generating test report..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" surefire-report:report
+    if command -v mvn &> /dev/null; then
+        mvn surefire-report:report
+    elif [ -f "./mvnw" ]; then
+        ./mvnw surefire-report:report
+    else
+        echo "❌ Maven not found and no wrapper available"
+        exit 1
+    fi
     echo "✅ Test report: target/site/surefire-report.html"
 
 # =============================================================================
@@ -620,9 +950,15 @@ status:
     #!/usr/bin/env bash
     echo "📊 Project status..."
     echo "Java version:"
-    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    java -version
     echo "Maven version:"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    if command -v mvn &> /dev/null; then
+        mvn -version
+    elif [ -f "./mvnw" ]; then
+        ./mvnw -version
+    else
+        echo "❌ Maven not found and no wrapper available"
+    fi
     echo "Git status:"
     git status --porcelain | wc -l | xargs echo "Modified files:"
     echo "Build status:"
@@ -636,12 +972,23 @@ version:
     #!/usr/bin/env bash
     echo "📦 Version information..."
     echo "Spring Boot version:"
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" help:evaluate -Dexpression=project.version -q -DforceStdout
+    if command -v mvn &> /dev/null; then
+        mvn help:evaluate -Dexpression=project.version -q -DforceStdout
+    elif [ -f "./mvnw" ]; then
+        ./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout
+    else
+        echo "❌ Maven not found and no wrapper available"
+    fi
     echo "Java version:"
-    "/c/Program Files/Java/jdk-24/bin/java.exe" -version
+    java -version
     echo "Maven version:"
-    "/c/Users/krato/Desktop/apache-maven-3.9.11/bin/mvn" -version
+    if command -v mvn &> /dev/null; then
+        mvn -version
+    elif [ -f "./mvnw" ]; then
+        ./mvnw -version
+    else
+        echo "❌ Maven not found and no wrapper available"
+    fi
 
 env-info:
     #!/usr/bin/env bash
@@ -683,8 +1030,6 @@ help:
 dev-setup:
     #!/usr/bin/env bash
     echo "🔧 Setting up development environment..."
-    export JAVA_HOME="/c/Program Files/Java/jdk-24"
-    export PATH="/c/Users/krato/Desktop/apache-maven-3.9.11/bin:$PATH"
     echo "✅ Development environment configured"
 
 dev-logs:
@@ -706,7 +1051,13 @@ detect:
     if [ -f "pom.xml" ]; then
         echo "📦 Maven project detected"
         echo "Java version: $(java -version 2>&1 | head -1)"
-        echo "Maven version: $(mvn -version 2>&1 | head -1)"
+        if command -v mvn &> /dev/null; then
+            echo "Maven version: $(mvn -version 2>&1 | head -1)"
+        elif [ -f "./mvnw" ]; then
+            echo "Maven wrapper available"
+        else
+            echo "❌ Maven not found and no wrapper available"
+        fi
     elif [ -f "build.gradle" ]; then
         echo "📦 Gradle project detected"
         echo "Java version: $(java -version 2>&1 | head -1)"
