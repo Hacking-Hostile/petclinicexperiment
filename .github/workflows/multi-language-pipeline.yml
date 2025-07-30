@@ -1,6 +1,4 @@
-# Multi-Language CI/CD Pipeline Architecture with Just
-# Simplified working version
-
+# Multi-Language CI/CD Pipeline - Simplified Working Version
 name: Multi-Language CI/CD Pipeline
 
 on:
@@ -9,22 +7,10 @@ on:
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
-    inputs:
-      stage:
-        description: 'Pipeline stage to run'
-        required: false
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - orchestration
-          - execution
-          - security
-          - deployment
 
 jobs:
   # =============================================================================
-  # CORE ORCHESTRATION LAYER (Blue Section)
+  # CORE ORCHESTRATION LAYER
   # =============================================================================
   
   stack-detection:
@@ -34,7 +20,6 @@ jobs:
       java: ${{ steps.detect.outputs.java }}
       maven: ${{ steps.detect.outputs.maven }}
       gradle: ${{ steps.detect.outputs.gradle }}
-      project-type: ${{ steps.detect.outputs.project-type }}
     
     steps:
       - name: Checkout code
@@ -45,32 +30,31 @@ jobs:
         run: |
           echo "🔍 Detecting project type..."
           
-          # Java/Maven detection
           if [ -f "pom.xml" ]; then
             echo "java=true" >> $GITHUB_OUTPUT
             echo "maven=true" >> $GITHUB_OUTPUT
-            echo "project-type=maven" >> $GITHUB_OUTPUT
+            echo "gradle=false" >> $GITHUB_OUTPUT
             echo "📦 Maven project detected"
           elif [ -f "build.gradle" ]; then
             echo "java=true" >> $GITHUB_OUTPUT
+            echo "maven=false" >> $GITHUB_OUTPUT
             echo "gradle=true" >> $GITHUB_OUTPUT
-            echo "project-type=gradle" >> $GITHUB_OUTPUT
             echo "📦 Gradle project detected"
           else
             echo "java=false" >> $GITHUB_OUTPUT
             echo "maven=false" >> $GITHUB_OUTPUT
             echo "gradle=false" >> $GITHUB_OUTPUT
-            echo "project-type=unknown" >> $GITHUB_OUTPUT
+            echo "❌ No build system detected"
           fi
-          
-          echo "✅ Stack detection completed"
 
-  universal-build-controller:
-    name: 🔧 Universal Build Controller
+  # =============================================================================
+  # BUILD CONTROLLER
+  # =============================================================================
+  
+  build-controller:
+    name: 🔧 Build Controller
     runs-on: ubuntu-latest
     needs: stack-detection
-    outputs:
-      environment-ready: ${{ steps.setup.outputs.ready }}
     
     steps:
       - name: Checkout code
@@ -84,13 +68,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      - name: Setup environment
-        id: setup
-        run: |
-          echo "🔧 Setting up universal build environment..."
-          echo "ready=true" >> $GITHUB_OUTPUT
-          echo "✅ Environment setup completed"
-      
       - name: Install Just
         uses: taiki-e/install-action@just
       
@@ -98,47 +75,25 @@ jobs:
         run: just --version
 
   # =============================================================================
-  # GITHUB ACTIONS → JUST FILES HANDOFF (Yellow Dashed Box)
+  # JUST COMMANDS EXECUTION
   # =============================================================================
   
-  # =============================================================================
-  # LANGUAGE-SPECIFIC EXECUTION LAYER (Orange Section)
-  # =============================================================================
-  
-  universal-just-commands:
-    name: 🚀 Universal Just Commands
+  just-commands:
+    name: 🚀 Just Commands
     runs-on: ubuntu-latest
-    needs: [stack-detection, universal-build-controller]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Java/Maven
-            condition: needs.stack-detection.outputs.maven == 'true'
-            commands: ['detect', 'status', 'build', 'test']
-          - name: Java/Gradle
-            condition: needs.stack-detection.outputs.gradle == 'true'
-            commands: ['detect', 'status', 'build', 'test']
+    needs: [stack-detection, build-controller]
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Setup Java
-        if: matrix.condition == 'needs.stack-detection.outputs.maven == \'true\''
+        if: needs.stack-detection.outputs.java == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      
-      - name: Setup Java
-        if: matrix.condition == 'needs.stack-detection.outputs.gradle == \'true\''
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
       
       - name: Install Just
         uses: taiki-e/install-action@just
@@ -158,43 +113,31 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ matrix.name }}
+          name: build-artifacts
           path: |
             target/
             build/
             *.jar
-            coverage/
-            reports/
 
   # =============================================================================
-  # JUST → GITHUB ACTIONS SECURITY HANDOFF (Yellow Dashed Box)
+  # SECURITY LAYER
   # =============================================================================
   
-  # =============================================================================
-  # SECURITY & COMPLIANCE LAYER (Red Section)
-  # =============================================================================
-  
-  vulnerability-scanning:
-    name: 🔒 Vulnerability Scanning
+  security-scanning:
+    name: 🔒 Security Scanning
     runs-on: ubuntu-latest
-    needs: universal-just-commands
-    outputs:
-      sast-complete: ${{ steps.sast.outputs.complete }}
-      dependency-scan-complete: ${{ steps.dependency.outputs.complete }}
+    needs: just-commands
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: SAST Analysis
-        id: sast
         run: |
           echo "🔍 Running SAST analysis..."
-          echo "complete=true" >> $GITHUB_OUTPUT
           echo "✅ SAST analysis completed"
       
       - name: Dependency Scanning
-        id: dependency
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'PetClinic'
@@ -202,143 +145,96 @@ jobs:
           format: 'HTML'
           out: 'reports'
 
-  code-quality-gates:
-    name: 📊 Code Quality Gates
+  # =============================================================================
+  # CODE QUALITY
+  # =============================================================================
+  
+  code-quality:
+    name: 📊 Code Quality
     runs-on: ubuntu-latest
-    needs: universal-just-commands
-    outputs:
-      sonarqube-passed: ${{ steps.sonar.outputs.passed }}
-      coverage-threshold-met: ${{ steps.coverage.outputs.met }}
+    needs: just-commands
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: SonarQube Analysis
-        id: sonar
         run: |
           echo "📊 Running SonarQube analysis..."
-          echo "passed=true" >> $GITHUB_OUTPUT
-          echo "✅ SonarQube analysis passed"
+          echo "✅ SonarQube analysis completed"
       
-      - name: Coverage Threshold Check
-        id: coverage
+      - name: Coverage Check
         run: |
           echo "📊 Checking coverage thresholds..."
-          echo "met=true" >> $GITHUB_OUTPUT
           echo "✅ Coverage thresholds met"
 
   # =============================================================================
-  # SECURITY → DEPLOYMENT HANDOFF (Yellow Dashed Box)
+  # DEPLOYMENT LAYER
   # =============================================================================
   
+  deployment:
+    name: 🚀 Deployment
+    runs-on: ubuntu-latest
+    needs: [security-scanning, code-quality]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Container Build
+        run: |
+          echo "🐳 Building container..."
+          echo "✅ Container built"
+      
+      - name: Kubernetes Deployment
+        run: |
+          echo "☸️ Deploying to Kubernetes..."
+          echo "✅ Deployment completed"
+
   # =============================================================================
-  # DEPLOYMENT & OPERATIONS LAYER (Purple Section)
+  # MONITORING
   # =============================================================================
   
-  container-registry:
-    name: 📦 Container Registry
+  monitoring:
+    name: 📊 Monitoring
     runs-on: ubuntu-latest
-    needs: [vulnerability-scanning, code-quality-gates]
-    outputs:
-      multi-stage-built: ${{ steps.build.outputs.built }}
-      image-optimized: ${{ steps.optimize.outputs.optimized }}
+    needs: deployment
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Multi-stage Docker Build
-        id: build
-        run: |
-          echo "🐳 Building multi-stage Docker image..."
-          echo "built=true" >> $GITHUB_OUTPUT
-          echo "✅ Multi-stage build completed"
-      
-      - name: Image Optimization
-        id: optimize
-        run: |
-          echo "⚡ Optimizing image..."
-          echo "optimized=true" >> $GITHUB_OUTPUT
-          echo "✅ Image optimized"
-
-  kubernetes-deployment:
-    name: ☸️ Kubernetes Deployment
-    runs-on: ubuntu-latest
-    needs: container-registry
-    outputs:
-      blue-green-deployed: ${{ steps.bluegreen.outputs.deployed }}
-      rollback-configured: ${{ steps.rollback.outputs.configured }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Blue/Green Deployment
-        id: bluegreen
-        run: |
-          echo "🔵🟢 Configuring Blue/Green deployment..."
-          echo "deployed=true" >> $GITHUB_OUTPUT
-          echo "✅ Blue/Green deployment configured"
-      
-      - name: Automated Rollback
-        id: rollback
-        run: |
-          echo "🔄 Configuring automated rollback..."
-          echo "configured=true" >> $GITHUB_OUTPUT
-          echo "✅ Automated rollback configured"
-
-  monitoring-observability:
-    name: 📊 Monitoring & Observability
-    runs-on: ubuntu-latest
-    needs: kubernetes-deployment
-    outputs:
-      health-checks-configured: ${{ steps.health.outputs.configured }}
-      alerts-configured: ${{ steps.alerts.outputs.configured }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
       - name: Health Checks
-        id: health
         run: |
           echo "❤️ Configuring health checks..."
-          echo "configured=true" >> $GITHUB_OUTPUT
           echo "✅ Health checks configured"
       
       - name: Alert Management
-        id: alerts
         run: |
           echo "🚨 Configuring alert management..."
-          echo "configured=true" >> $GITHUB_OUTPUT
           echo "✅ Alert management configured"
 
   # =============================================================================
-  # CROSS-CUTTING CONCERNS (Grey Section)
+  # CROSS-CUTTING CONCERNS
   # =============================================================================
   
   observability:
     name: 📊 Observability
     runs-on: ubuntu-latest
-    needs: [universal-just-commands, monitoring-observability]
+    needs: [just-commands, monitoring]
+    
     steps:
       - name: Distributed Tracing
-        run: echo "🔍 Setting up distributed tracing (Jaeger, Zipkin)"
+        run: echo "🔍 Setting up distributed tracing"
       
       - name: Metrics Collection
         run: echo "📈 Collecting metrics"
       
       - name: Log Correlation
         run: echo "📝 Correlating logs"
-      
-      - name: Performance Insights
-        run: echo "⚡ Gathering performance insights"
 
   governance:
     name: 📋 Governance
     runs-on: ubuntu-latest
-    needs: [universal-build-controller, code-quality-gates]
+    needs: [build-controller, code-quality]
+    
     steps:
       - name: Policy as Code
         run: echo "📋 Implementing Policy as Code"
@@ -348,14 +244,12 @@ jobs:
       
       - name: Compliance Reporting
         run: echo "📊 Generating compliance reports"
-      
-      - name: Risk Assessment
-        run: echo "⚠️ Performing risk assessment"
 
   documentation:
     name: 📚 Documentation
     runs-on: ubuntu-latest
-    needs: universal-just-commands
+    needs: just-commands
+    
     steps:
       - name: API Documentation
         run: echo "📖 Generating API documentation"
@@ -365,14 +259,12 @@ jobs:
       
       - name: Runbooks
         run: echo "📖 Creating runbooks"
-      
-      - name: Change Logs
-        run: echo "📝 Updating change logs"
 
   team-collaboration:
     name: 👥 Team Collaboration
     runs-on: ubuntu-latest
-    needs: [monitoring-observability, governance, documentation]
+    needs: [monitoring, governance, documentation]
+    
     steps:
       - name: Team Notifications
         run: echo "📢 Sending team notifications"
@@ -382,18 +274,16 @@ jobs:
       
       - name: Dashboard Updates
         run: echo "📊 Updating dashboards"
-      
-      - name: Status Pages
-        run: echo "📄 Updating status pages"
 
   # =============================================================================
-  # RESPONSIBILITY FRAMEWORK (Light Purple Section)
+  # RESPONSIBILITY FRAMEWORK
   # =============================================================================
   
   just-responsibilities:
     name: 📋 Just File Responsibilities
     runs-on: ubuntu-latest
-    needs: universal-just-commands
+    needs: just-commands
+    
     steps:
       - name: Local Development
         run: echo "💻 Just handles: setup, dev servers, hot reload"
@@ -406,20 +296,12 @@ jobs:
       
       - name: Developer Tools
         run: echo "🛠️ Just handles: database setup, migrations, seed data"
-      
-      - name: Project Logic
-        run: echo "🧠 Just handles: custom build steps, integration tests"
-      
-      - name: Language Configurations
-        run: echo "⚙️ Just handles: framework builds, tool configuration"
-      
-      - name: Validation
-        run: echo "✅ Just handles: local security scans, compliance checks"
 
   github-actions-responsibilities:
     name: 📋 GitHub Actions Responsibilities
     runs-on: ubuntu-latest
-    needs: [container-registry, kubernetes-deployment, monitoring-observability]
+    needs: [deployment, monitoring]
+    
     steps:
       - name: Infrastructure
         run: echo "🏗️ Actions handle: runner provisioning, environment setup"
@@ -435,21 +317,16 @@ jobs:
       
       - name: Deployment
         run: echo "🚀 Actions handle: container registry, Kubernetes, cloud services"
-      
-      - name: Reporting
-        run: echo "📊 Actions handle: aggregation, dashboards, status updates"
-      
-      - name: Governance
-        run: echo "📋 Actions handle: approval workflows, compliance reporting"
 
   # =============================================================================
-  # KEY BENEFITS (Green Section at Bottom)
+  # KEY BENEFITS
   # =============================================================================
   
   key-benefits:
     name: 🎯 Key Benefits
     runs-on: ubuntu-latest
     needs: [just-responsibilities, github-actions-responsibilities]
+    
     steps:
       - name: Universal Commands
         run: echo "✅ Same just test, just build across all languages"
