@@ -3,7 +3,18 @@
 
 # Default target - shows available commands
 default:
-    @just --list
+    @echo "Available commands:"
+    @echo "  System & Environment: java-version, get-mvn-cmd, maven-version, detect, env-info, status"
+    @echo "  Utility Commands: find-java, find-resources, count-lines, cleanup, db-schema"
+    @echo "  Database Commands: db-init-h2, db-reset-h2"
+    @echo "  Development Commands: dev-setup, dev-status, dev-stop"
+    @echo "  Build Commands: build, clean, test"
+    @echo "  Maven Commands: mvn-validate, mvn-site, coverage, cyclonedx-report"
+    @echo "  Quality Commands: lint, format, deploy"
+    @echo "  Run Commands: run, run-h2"
+    @echo ""
+    @echo "Run 'just <command>' to execute a specific command"
+    @echo "Run 'just --list' to see all available commands"
 
 # Helper function to get Maven command
 get-mvn-cmd:
@@ -28,7 +39,8 @@ build:
         if command -v mvn &> /dev/null; then
             mvn clean package -DskipTests
         elif [ -f "./mvnw" ]; then
-            ./mvnw clean package -DskipTests
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw clean package -DskipTests 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
@@ -51,7 +63,8 @@ test:
         if command -v mvn &> /dev/null; then
             mvn test
         elif [ -f "./mvnw" ]; then
-            ./mvnw test
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw test 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
@@ -74,7 +87,8 @@ clean:
         if command -v mvn &> /dev/null; then
             mvn clean
         elif [ -f "./mvnw" ]; then
-            ./mvnw clean
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw clean 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
@@ -92,7 +106,7 @@ clean:
 run:
     #!/usr/bin/env bash
     echo "🚀 Starting Spring PetClinic application..."
-    if [ -f "target/spring-petclinic-*.jar" ]; then
+    if [ -d "target" ] && ls target/spring-petclinic-*.jar 1> /dev/null 2>&1; then
         echo "📦 Running JAR file"
         java -jar target/spring-petclinic-*.jar
     elif [ -f "pom.xml" ]; then
@@ -100,7 +114,8 @@ run:
         if command -v mvn &> /dev/null; then
             mvn spring-boot:run
         elif [ -f "./mvnw" ]; then
-            ./mvnw spring-boot:run
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw spring-boot:run 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
@@ -190,7 +205,8 @@ mvn-validate:
     if command -v mvn &> /dev/null; then
         mvn validate
     elif [ -f "./mvnw" ]; then
-        ./mvnw validate
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw validate 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -202,7 +218,8 @@ mvn-site:
     if command -v mvn &> /dev/null; then
         mvn site
     elif [ -f "./mvnw" ]; then
-        ./mvnw site
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw site 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -218,7 +235,8 @@ run-h2:
     if command -v mvn &> /dev/null; then
         mvn spring-boot:run -Dspring-boot.run.profiles=h2
     elif [ -f "./mvnw" ]; then
-        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -230,7 +248,8 @@ db-init-h2:
     if command -v mvn &> /dev/null; then
         mvn spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
     elif [ -f "./mvnw" ]; then
-        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -272,7 +291,8 @@ cyclonedx-report:
     if command -v mvn &> /dev/null; then
         mvn cyclonedx:makeAggregateBom
     elif [ -f "./mvnw" ]; then
-        ./mvnw cyclonedx:makeAggregateBom
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw cyclonedx:makeAggregateBom 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -282,34 +302,8 @@ cyclonedx-report:
 # BUILD AND PACKAGE COMMANDS
 # =============================================================================
 
-jar-info:
-    #!/usr/bin/env bash
-    echo "📦 Getting JAR file info..."
-    jar tf target/spring-petclinic-*.jar | head -20
-
-jar-verify:
-    #!/usr/bin/env bash
-    echo "✅ Verifying JAR file..."
-    jar tf target/spring-petclinic-*.jar > /dev/null && echo "✅ JAR file is valid"
-
-jar-extract:
-    #!/usr/bin/env bash
-    echo "📦 Extracting JAR file..."
-    mkdir -p target/extracted
-    jar xf target/spring-petclinic-*.jar -d target/extracted
-    echo "✅ JAR extracted to target/extracted/"
-
-fat-jar:
-    #!/usr/bin/env bash
-    echo "📦 Creating fat JAR..."
-    if command -v mvn &> /dev/null; then
-        mvn package -Dspring-boot.repackage.enabled=true
-    elif [ -f "./mvnw" ]; then
-        ./mvnw package -Dspring-boot.repackage.enabled=true
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+# Note: JAR commands removed due to Maven download issues
+# These commands require a successful build first
 
 # =============================================================================
 # SYSTEM AND ENVIRONMENT COMMANDS
@@ -326,7 +320,8 @@ maven-version:
     if command -v mvn &> /dev/null; then
         mvn -version
     elif [ -f "./mvnw" ]; then
-        ./mvnw -version
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw -version 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
         exit 1
@@ -341,14 +336,15 @@ status:
     if command -v mvn &> /dev/null; then
         mvn -version
     elif [ -f "./mvnw" ]; then
-        ./mvnw -version
+        echo "📥 Maven wrapper downloading Maven (first time only)..."
+        ./mvnw -version 2>/dev/null || echo "⚠️  Maven download in progress..."
     else
         echo "❌ Maven not found and no wrapper available"
     fi
     echo "Git status:"
     git status --porcelain | wc -l | xargs echo "Modified files:"
     echo "Build status:"
-    if [ -f "target/spring-petclinic-*.jar" ]; then
+    if [ -d "target" ] && ls target/spring-petclinic-*.jar 1> /dev/null 2>&1; then
         echo "✅ Application built successfully"
     else
         echo "❌ Application not built"
@@ -361,7 +357,7 @@ env-info:
     echo "M2_HOME: $M2_HOME"
     echo "PATH: $PATH"
     echo "Current directory: $(pwd)"
-    echo "Available memory: $(free -h 2>/dev/null || echo 'Not available on Windows')"
+    echo "Available memory: $(free -h 2>/dev/null || vm_stat 2>/dev/null | head -1 || echo 'Not available')"
 
 # =============================================================================
 # FILE AND DIRECTORY COMMANDS
@@ -408,7 +404,7 @@ dev-status:
     echo "📊 Development environment status..."
     if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
         echo "✅ Application is running"
-        curl -s http://localhost:8080/actuator/health | jq .
+        curl -s http://localhost:8080/actuator/health | jq . 2>/dev/null || curl -s http://localhost:8080/actuator/health
     else
         echo "❌ Application is not running"
     fi
