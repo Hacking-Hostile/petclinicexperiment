@@ -165,3 +165,4 @@ For additional details, please refer to the blog post [Hello DCO, Goodbye CLA: S
 The Spring PetClinic sample application is released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
 # Pipeline test - Wed, Jul 30, 2025 11:07:01 PM
 # Pipeline test - simplified version Thu, Jul 31, 2025 12:00:15 AM
+# Pipeline test - minimal version Thu, Jul 31, 2025 12:05:43 AM
