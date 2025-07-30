@@ -1,0 +1,70 @@
+# Maven Commands Workflow
+# Mirrors justfile Maven commands: mvn-validate, mvn-site, coverage, cyclonedx-report
+
+name: Maven Commands
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "pom.xml"
+      - "justfile"
+      - "src/**"
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Maven command to run"
+        required: true
+        default: "mvn-validate"
+        type: choice
+        options:
+          - mvn-validate
+          - mvn-site
+          - coverage
+          - cyclonedx-report
+
+jobs:
+  maven-commands:
+    name: 📦 Maven Commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: Run Maven Validate
+        if: github.event.inputs.command == 'mvn-validate' || github.event.inputs.command == ''
+        run: just mvn-validate
+
+      - name: Run Maven Site
+        if: github.event.inputs.command == 'mvn-site'
+        run: just mvn-site
+
+      - name: Run Coverage
+        if: github.event.inputs.command == 'coverage'
+        run: just coverage
+
+      - name: Run CycloneDX Report
+        if: github.event.inputs.command == 'cyclonedx-report'
+        run: just cyclonedx-report
+
+      - name: Upload Maven artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maven-artifacts
+          path: |
+            target/site/
+            target/cyclonedx/
+            reports/

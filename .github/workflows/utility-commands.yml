@@ -1,0 +1,68 @@
+# Utility Commands Workflow
+# Mirrors justfile utility commands: find-java, find-resources, count-lines, cleanup
+
+name: Utility Commands
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "src/**"
+      - "justfile"
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Utility command to run"
+        required: true
+        default: "find-java"
+        type: choice
+        options:
+          - find-java
+          - find-resources
+          - count-lines
+          - cleanup
+
+jobs:
+  utility-commands:
+    name: 🔧 Utility Commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: Run Find Java Files
+        if: github.event.inputs.command == 'find-java' || github.event.inputs.command == ''
+        run: just find-java
+
+      - name: Run Find Resources
+        if: github.event.inputs.command == 'find-resources'
+        run: just find-resources
+
+      - name: Run Count Lines
+        if: github.event.inputs.command == 'count-lines'
+        run: just count-lines
+
+      - name: Run Cleanup
+        if: github.event.inputs.command == 'cleanup'
+        run: just cleanup
+
+      - name: Upload utility reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: utility-reports
+          path: |
+            reports/
+            *.log

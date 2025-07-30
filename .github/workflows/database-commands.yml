@@ -1,0 +1,64 @@
+# Database Commands Workflow
+# Mirrors justfile database commands: db-schema, db-init-h2, db-reset-h2
+
+name: Database Commands
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "src/main/resources/db/**"
+      - "justfile"
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Database command to run"
+        required: true
+        default: "db-schema"
+        type: choice
+        options:
+          - db-schema
+          - db-init-h2
+          - db-reset-h2
+
+jobs:
+  database-commands:
+    name: 🗄️ Database Commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
+      - name: Run Database Schema
+        if: github.event.inputs.command == 'db-schema' || github.event.inputs.command == ''
+        run: just db-schema
+
+      - name: Run Database Init H2
+        if: github.event.inputs.command == 'db-init-h2'
+        run: just db-init-h2
+
+      - name: Run Database Reset H2
+        if: github.event.inputs.command == 'db-reset-h2'
+        run: just db-reset-h2
+
+      - name: Upload database artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: database-artifacts
+          path: |
+            src/main/resources/db/
+            *.sql
+            *.db
