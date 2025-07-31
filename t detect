@@ -1,0 +1,5 @@
+[33me3e77ab[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m test: Trigger minimal pipeline test
+[33mf28a67c[m fix: Create minimal working pipeline - remove complex matrix logic
+[33mea6785d[m test: Trigger simplified pipeline test
+[33m3277a45[m fix: Simplify multi-language pipeline to fix failures
+[33m8c8345c[m test: Trigger pipeline test
