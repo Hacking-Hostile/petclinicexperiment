@@ -3,58 +3,58 @@ name: Multi-Language CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
   # =============================================================================
   # JUST COMMANDS EXECUTION (Core Focus)
   # =============================================================================
-  
+
   just-commands:
     name: 🚀 Just Commands Execution
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           cache: maven
-      
+
       - name: Install Just
         uses: taiki-e/install-action@just
-      
+
       - name: Verify Just installation
         run: just --version
-      
+
       - name: Run Just Detect
         run: just detect
-      
+
       - name: Run Just Status
         run: just status
-      
+
       - name: Run Just Build
         run: just build
-      
+
       - name: Run Just Test
         run: just test
-      
+
       - name: Run Just Clean
         run: just clean
-      
+
       - name: Run Just Maven Validate
         run: just mvn-validate
-      
+
       - name: Run Just Coverage
         run: just coverage
-      
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -62,4 +62,4 @@ jobs:
           path: |
             target/
             build/
-            *.jar 
+            *.jar
