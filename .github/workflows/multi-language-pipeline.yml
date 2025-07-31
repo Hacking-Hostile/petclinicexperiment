@@ -1,4 +1,4 @@
-# Multi-Language CI/CD Pipeline - Simplified Working Version
+# Multi-Language CI/CD Pipeline - Just Commands Only
 name: Multi-Language CI/CD Pipeline
 
 on:
@@ -10,58 +10,18 @@ on:
 
 jobs:
   # =============================================================================
-  # CORE ORCHESTRATION LAYER
+  # JUST COMMANDS EXECUTION (Core Focus)
   # =============================================================================
   
-  stack-detection:
-    name: 🔍 Stack Detection
+  just-commands:
+    name: 🚀 Just Commands Execution
     runs-on: ubuntu-latest
-    outputs:
-      java: ${{ steps.detect.outputs.java }}
-      maven: ${{ steps.detect.outputs.maven }}
-      gradle: ${{ steps.detect.outputs.gradle }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Detect project stack
-        id: detect
-        run: |
-          echo "🔍 Detecting project type..."
-          
-          if [ -f "pom.xml" ]; then
-            echo "java=true" >> $GITHUB_OUTPUT
-            echo "maven=true" >> $GITHUB_OUTPUT
-            echo "gradle=false" >> $GITHUB_OUTPUT
-            echo "📦 Maven project detected"
-          elif [ -f "build.gradle" ]; then
-            echo "java=true" >> $GITHUB_OUTPUT
-            echo "maven=false" >> $GITHUB_OUTPUT
-            echo "gradle=true" >> $GITHUB_OUTPUT
-            echo "📦 Gradle project detected"
-          else
-            echo "java=false" >> $GITHUB_OUTPUT
-            echo "maven=false" >> $GITHUB_OUTPUT
-            echo "gradle=false" >> $GITHUB_OUTPUT
-            echo "❌ No build system detected"
-          fi
-
-  # =============================================================================
-  # BUILD CONTROLLER
-  # =============================================================================
-  
-  build-controller:
-    name: 🔧 Build Controller
-    runs-on: ubuntu-latest
-    needs: stack-detection
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Setup Java
-        if: needs.stack-detection.outputs.java == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -73,30 +33,6 @@ jobs:
       
       - name: Verify Just installation
         run: just --version
-
-  # =============================================================================
-  # JUST COMMANDS EXECUTION
-  # =============================================================================
-  
-  just-commands:
-    name: 🚀 Just Commands
-    runs-on: ubuntu-latest
-    needs: [stack-detection, build-controller]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Java
-        if: needs.stack-detection.outputs.java == 'true'
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-      
-      - name: Install Just
-        uses: taiki-e/install-action@just
       
       - name: Run Just Detect
         run: just detect
@@ -110,6 +46,15 @@ jobs:
       - name: Run Just Test
         run: just test
       
+      - name: Run Just Clean
+        run: just clean
+      
+      - name: Run Just Maven Validate
+        run: just mvn-validate
+      
+      - name: Run Just Coverage
+        run: just coverage
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -117,222 +62,4 @@ jobs:
           path: |
             target/
             build/
-            *.jar
-
-  # =============================================================================
-  # SECURITY LAYER (Simplified)
-  # =============================================================================
-  
-  security-scanning:
-    name: 🔒 Security Scanning
-    runs-on: ubuntu-latest
-    needs: just-commands
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: SAST Analysis
-        run: |
-          echo "🔍 Running SAST analysis..."
-          echo "✅ SAST analysis completed"
-      
-      - name: Basic Security Check
-        run: |
-          echo "🔒 Running basic security checks..."
-          echo "✅ Security checks completed"
-
-  # =============================================================================
-  # CODE QUALITY (Simplified)
-  # =============================================================================
-  
-  code-quality:
-    name: 📊 Code Quality
-    runs-on: ubuntu-latest
-    needs: just-commands
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Code Quality Analysis
-        run: |
-          echo "📊 Running code quality analysis..."
-          echo "✅ Code quality analysis completed"
-      
-      - name: Coverage Check
-        run: |
-          echo "📊 Checking coverage thresholds..."
-          echo "✅ Coverage thresholds met"
-
-  # =============================================================================
-  # DEPLOYMENT LAYER (Simplified)
-  # =============================================================================
-  
-  deployment:
-    name: 🚀 Deployment
-    runs-on: ubuntu-latest
-    needs: [security-scanning, code-quality]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Container Build
-        run: |
-          echo "🐳 Building container..."
-          echo "✅ Container built"
-      
-      - name: Kubernetes Deployment
-        run: |
-          echo "☸️ Deploying to Kubernetes..."
-          echo "✅ Deployment completed"
-
-  # =============================================================================
-  # MONITORING (Simplified)
-  # =============================================================================
-  
-  monitoring:
-    name: 📊 Monitoring
-    runs-on: ubuntu-latest
-    needs: deployment
-    
-    steps:
-      - name: Health Checks
-        run: |
-          echo "❤️ Configuring health checks..."
-          echo "✅ Health checks configured"
-      
-      - name: Alert Management
-        run: |
-          echo "🚨 Configuring alert management..."
-          echo "✅ Alert management configured"
-
-  # =============================================================================
-  # CROSS-CUTTING CONCERNS (Simplified)
-  # =============================================================================
-  
-  observability:
-    name: 📊 Observability
-    runs-on: ubuntu-latest
-    needs: [just-commands, monitoring]
-    
-    steps:
-      - name: Distributed Tracing
-        run: echo "🔍 Setting up distributed tracing"
-      
-      - name: Metrics Collection
-        run: echo "📈 Collecting metrics"
-      
-      - name: Log Correlation
-        run: echo "📝 Correlating logs"
-
-  governance:
-    name: 📋 Governance
-    runs-on: ubuntu-latest
-    needs: [build-controller, code-quality]
-    
-    steps:
-      - name: Policy as Code
-        run: echo "📋 Implementing Policy as Code"
-      
-      - name: Audit Trails
-        run: echo "📝 Creating audit trails"
-      
-      - name: Compliance Reporting
-        run: echo "📊 Generating compliance reports"
-
-  documentation:
-    name: 📚 Documentation
-    runs-on: ubuntu-latest
-    needs: just-commands
-    
-    steps:
-      - name: API Documentation
-        run: echo "📖 Generating API documentation"
-      
-      - name: Architecture Diagrams
-        run: echo "🏗️ Creating architecture diagrams"
-      
-      - name: Runbooks
-        run: echo "📖 Creating runbooks"
-
-  team-collaboration:
-    name: 👥 Team Collaboration
-    runs-on: ubuntu-latest
-    needs: [monitoring, governance, documentation]
-    
-    steps:
-      - name: Team Notifications
-        run: echo "📢 Sending team notifications"
-      
-      - name: Email Alerts
-        run: echo "📧 Sending email alerts"
-      
-      - name: Dashboard Updates
-        run: echo "📊 Updating dashboards"
-
-  # =============================================================================
-  # RESPONSIBILITY FRAMEWORK
-  # =============================================================================
-  
-  just-responsibilities:
-    name: 📋 Just File Responsibilities
-    runs-on: ubuntu-latest
-    needs: just-commands
-    
-    steps:
-      - name: Local Development
-        run: echo "💻 Just handles: setup, dev servers, hot reload"
-      
-      - name: Code Quality
-        run: echo "🔍 Just handles: tests, linting, formatting"
-      
-      - name: Build Process
-        run: echo "🔨 Just handles: compilation, packaging, optimization"
-      
-      - name: Developer Tools
-        run: echo "🛠️ Just handles: database setup, migrations, seed data"
-
-  github-actions-responsibilities:
-    name: 📋 GitHub Actions Responsibilities
-    runs-on: ubuntu-latest
-    needs: [deployment, monitoring]
-    
-    steps:
-      - name: Infrastructure
-        run: echo "🏗️ Actions handle: runner provisioning, environment setup"
-      
-      - name: Orchestration
-        run: echo "🎼 Actions handle: job scheduling, matrix builds, parallelization"
-      
-      - name: Integration
-        run: echo "🔗 Actions handle: external services, APIs, notifications"
-      
-      - name: Security
-        run: echo "🔒 Actions handle: secret management, credential injection"
-      
-      - name: Deployment
-        run: echo "🚀 Actions handle: container registry, Kubernetes, cloud services"
-
-  # =============================================================================
-  # KEY BENEFITS
-  # =============================================================================
-  
-  key-benefits:
-    name: 🎯 Key Benefits
-    runs-on: ubuntu-latest
-    needs: [just-responsibilities, github-actions-responsibilities]
-    
-    steps:
-      - name: Universal Commands
-        run: echo "✅ Same just test, just build across all languages"
-      
-      - name: Local-CI Parity
-        run: echo "✅ If it works locally, it works in CI"
-      
-      - name: Security First
-        run: echo "✅ Comprehensive scanning at local and CI levels"
-      
-      - name: Developer Experience
-        run: echo "✅ Consistent workflow across Java, Python, Node.js, Go, Rust, .NET" 
+            *.jar 
