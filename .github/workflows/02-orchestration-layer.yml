@@ -25,16 +25,16 @@ jobs:
       rust: ${{ steps.detect.outputs.rust }}
       go: ${{ steps.detect.outputs.go }}
       dotnet: ${{ steps.detect.outputs.dotnet }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Detect project stack
         id: detect
         run: |
           echo "🔍 Detecting project type..."
-          
+
           # Java/Maven/Gradle
           if [ -f "pom.xml" ]; then
             echo "java=true" >> $GITHUB_OUTPUT
@@ -51,7 +51,7 @@ jobs:
             echo "maven=false" >> $GITHUB_OUTPUT
             echo "gradle=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Node.js
           if [ -f "package.json" ]; then
             echo "node=true" >> $GITHUB_OUTPUT
@@ -59,7 +59,7 @@ jobs:
           else
             echo "node=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Python
           if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ]; then
             echo "python=true" >> $GITHUB_OUTPUT
@@ -67,7 +67,7 @@ jobs:
           else
             echo "python=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Rust
           if [ -f "Cargo.toml" ]; then
             echo "rust=true" >> $GITHUB_OUTPUT
@@ -75,7 +75,7 @@ jobs:
           else
             echo "rust=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Go
           if [ -f "go.mod" ]; then
             echo "go=true" >> $GITHUB_OUTPUT
@@ -83,7 +83,7 @@ jobs:
           else
             echo "go=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # .NET
           if [ -f "*.csproj" ] || [ -f "*.vbproj" ] || [ -f "*.fsproj" ]; then
             echo "dotnet=true" >> $GITHUB_OUTPUT
@@ -96,55 +96,55 @@ jobs:
     name: 🔧 Universal Build Controller
     runs-on: ubuntu-latest
     needs: stack-detection
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Java (if needed)
         if: needs.stack-detection.outputs.java == 'true'
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           cache: maven
-      
+
       - name: Setup Node.js (if needed)
         if: needs.stack-detection.outputs.node == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: "18"
+          cache: "npm"
+
       - name: Setup Python (if needed)
         if: needs.stack-detection.outputs.python == 'true'
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+          python-version: "3.11"
+          cache: "pip"
+
       - name: Setup Rust (if needed)
         if: needs.stack-detection.outputs.rust == 'true'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      
+
       - name: Setup Go (if needed)
         if: needs.stack-detection.outputs.go == 'true'
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
-      
+          go-version: "1.21"
+
       - name: Setup .NET (if needed)
         if: needs.stack-detection.outputs.dotnet == 'true'
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
-      
+          dotnet-version: "8.0.x"
+
       - name: Install Just
         uses: taiki-e/install-action@just
-      
+
       - name: Verify Just installation
         run: just --version
 
@@ -152,11 +152,11 @@ jobs:
     name: ⚙️ Config Manager
     runs-on: ubuntu-latest
     needs: stack-detection
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Environment setup
         run: |
           echo "⚙️ Configuring environment..."
@@ -167,12 +167,12 @@ jobs:
           echo "Rust: ${{ needs.stack-detection.outputs.rust }}"
           echo "Go: ${{ needs.stack-detection.outputs.go }}"
           echo ".NET: ${{ needs.stack-detection.outputs.dotnet }}"
-      
+
       - name: Secret injection
         run: |
           echo "🔐 Injecting secrets..."
           echo "✅ Secrets configured"
-      
+
       - name: Policy enforcement
         run: |
           echo "📋 Enforcing policies..."
@@ -182,7 +182,7 @@ jobs:
     name: 📊 Orchestration Summary
     runs-on: ubuntu-latest
     needs: [stack-detection, universal-build-controller, config-manager]
-    
+
     steps:
       - name: Display orchestration summary
         run: |
@@ -197,4 +197,4 @@ jobs:
           echo "Go: ${{ needs.stack-detection.outputs.go }}"
           echo ".NET: ${{ needs.stack-detection.outputs.dotnet }}"
           echo ""
-          echo "✅ Orchestration Layer completed - ready for Execution Layer" 
+          echo "✅ Orchestration Layer completed - ready for Execution Layer"

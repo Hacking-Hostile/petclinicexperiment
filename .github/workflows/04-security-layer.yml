@@ -16,26 +16,26 @@ jobs:
   security-scanning:
     name: 🔒 Security Scanning
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: SAST Analysis
         run: |
           echo "🔍 Running SAST analysis..."
           echo "✅ SAST analysis completed"
-      
+
       - name: Dependency Scanning
         run: |
           echo "📦 Scanning dependencies..."
           echo "✅ Dependency scan completed"
-      
+
       - name: Container Scanning
         run: |
           echo "🐳 Scanning containers..."
           echo "✅ Container scan completed"
-      
+
       - name: License Compliance
         run: |
           echo "📄 Checking license compliance..."
@@ -44,21 +44,21 @@ jobs:
   code-quality:
     name: 📊 Code Quality
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: SonarQube Analysis
         run: |
           echo "📊 Running SonarQube analysis..."
           echo "✅ SonarQube analysis completed"
-      
+
       - name: Coverage Check
         run: |
           echo "📊 Checking coverage thresholds..."
           echo "✅ Coverage thresholds met"
-      
+
       - name: Technical Debt
         run: |
           echo "📊 Analyzing technical debt..."
@@ -67,18 +67,18 @@ jobs:
   secrets-management:
     name: 🔐 Secrets Management
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Secret scanning
         run: |
           echo "🔍 Scanning for secrets in code..."
           echo "✅ Secret scan completed"
-      
+
       - name: Credential rotation
         run: |
           echo "🔄 Rotating credentials..."
           echo "✅ Credentials rotated"
-      
+
       - name: Key management
         run: |
           echo "🔑 Managing keys..."
@@ -88,18 +88,18 @@ jobs:
     name: 📋 Compliance Checks
     runs-on: ubuntu-latest
     needs: security-scanning
-    
+
     steps:
       - name: GDPR Compliance
         run: |
           echo "📋 Checking GDPR compliance..."
           echo "✅ GDPR compliance verified"
-      
+
       - name: SOC2 Requirements
         run: |
           echo "📋 Checking SOC2 requirements..."
           echo "✅ SOC2 requirements met"
-      
+
       - name: Industry Standards
         run: |
           echo "📋 Checking industry standards..."
@@ -108,8 +108,9 @@ jobs:
   security-summary:
     name: 📊 Security Summary
     runs-on: ubuntu-latest
-    needs: [security-scanning, code-quality, secrets-management, compliance-checks]
-    
+    needs:
+      [security-scanning, code-quality, secrets-management, compliance-checks]
+
     steps:
       - name: Display security summary
         run: |
@@ -120,4 +121,4 @@ jobs:
           echo "✅ Secrets Management: Completed"
           echo "✅ Compliance Checks: Completed"
           echo ""
-          echo "✅ Security Layer completed - ready for Deployment Layer" 
+          echo "✅ Security Layer completed - ready for Deployment Layer"
