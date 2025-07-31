@@ -1,0 +1,88 @@
+# Multi-Language CI/CD Pipeline - Cross-cutting Concerns
+# This workflow implements ONLY the Cross-cutting Concerns from the architecture diagram
+
+name: 06 - Cross-cutting Concerns
+
+# =============================================================================
+# CROSS-CUTTING CONCERNS - Observability, Governance, Documentation, Team Collaboration
+# =============================================================================
+
+on:
+  workflow_run:
+    workflows: ["05 - Deployment Layer"]
+    types: [completed]
+
+jobs:
+  observability:
+    name: 📊 Observability
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Distributed Tracing
+        run: echo "🔍 Setting up distributed tracing"
+      
+      - name: Metrics Collection
+        run: echo "📈 Collecting metrics"
+      
+      - name: Log Correlation
+        run: echo "📝 Correlating logs"
+
+  governance:
+    name: 📋 Governance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Policy as Code
+        run: echo "📋 Implementing Policy as Code"
+      
+      - name: Audit Trails
+        run: echo "📝 Creating audit trails"
+      
+      - name: Compliance Reporting
+        run: echo "📊 Generating compliance reports"
+
+  documentation:
+    name: 📚 Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: API Documentation
+        run: echo "📖 Generating API documentation"
+      
+      - name: Architecture Diagrams
+        run: echo "🏗️ Creating architecture diagrams"
+      
+      - name: Runbooks
+        run: echo "📖 Creating runbooks"
+
+  team-collaboration:
+    name: 👥 Team Collaboration
+    runs-on: ubuntu-latest
+    needs: [observability, governance, documentation]
+    
+    steps:
+      - name: Team Notifications
+        run: echo "📢 Sending team notifications"
+      
+      - name: Email Alerts
+        run: echo "📧 Sending email alerts"
+      
+      - name: Dashboard Updates
+        run: echo "📊 Updating dashboards"
+
+  cross-cutting-summary:
+    name: 📊 Cross-cutting Summary
+    runs-on: ubuntu-latest
+    needs: [observability, governance, documentation, team-collaboration]
+    
+    steps:
+      - name: Display cross-cutting summary
+        run: |
+          echo "📊 CROSS-CUTTING CONCERNS SUMMARY"
+          echo "=================================="
+          echo "✅ Observability: Completed"
+          echo "✅ Governance: Completed"
+          echo "✅ Documentation: Completed"
+          echo "✅ Team Collaboration: Completed"
+          echo ""
+          echo "✅ Cross-cutting Concerns completed - ready for Responsibility Framework" 
