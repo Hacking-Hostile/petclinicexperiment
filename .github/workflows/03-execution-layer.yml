@@ -34,8 +34,8 @@ jobs:
         run: |
           echo "🔄 Executing all just commands from justfile..."
           
-          # Get all available commands from justfile
-          JUST_COMMANDS=$(just --list | grep -v "Available recipes:" | tr '\n' ' ')
+          # Get all available commands from justfile, filtering out comments and invalid commands
+          JUST_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | grep -v "Default target" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$' | tr '\n' ' ')
           echo "Found commands: $JUST_COMMANDS"
           
           # Execute each command that exists in justfile
