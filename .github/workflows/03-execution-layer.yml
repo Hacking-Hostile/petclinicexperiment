@@ -59,8 +59,8 @@ jobs:
         run: |
           echo "🔄 Executing additional just commands..."
           
-          # Execute other useful commands if they exist
-          ADDITIONAL_COMMANDS="lint format security package docs"
+          # Execute other useful commands that actually exist in justfile
+          ADDITIONAL_COMMANDS="lint format deploy cyclonedx-report"
           
           for cmd in $ADDITIONAL_COMMANDS; do
             if just --list | grep -q "$cmd"; then
