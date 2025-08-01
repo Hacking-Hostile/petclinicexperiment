@@ -30,44 +30,24 @@ jobs:
           echo "📋 Available just commands:"
           just --list
           
-      - name: Execute core just commands dynamically
+      - name: Execute all just commands dynamically
         run: |
-          echo "🔄 Executing core just commands..."
+          echo "🔄 Executing all just commands from justfile..."
           
-          # Get all available commands (cleaner approach)
-          echo "📋 Available commands from justfile:"
-          just --list
+          # Get all available commands from justfile
+          JUST_COMMANDS=$(just --list | grep -v "Available recipes:" | tr '\n' ' ')
+          echo "Found commands: $JUST_COMMANDS"
           
-          # Define core commands that should always run in CI
-          CORE_COMMANDS="detect status build test clean mvn-validate coverage"
-          
-          # Execute each core command if it exists
-          for cmd in $CORE_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
+          # Execute each command that exists in justfile
+          for cmd in $JUST_COMMANDS; do
+            # Skip default command as it's just a help display
+            if [ "$cmd" != "default" ]; then
               echo "🔄 Executing: just $cmd"
               just $cmd
               if [ $? -ne 0 ]; then
                 echo "❌ Command 'just $cmd' failed"
                 exit 1
               fi
-            else
-              echo "⚠️  Command '$cmd' not found in justfile, skipping"
-            fi
-          done
-          
-      - name: Execute additional just commands
-        run: |
-          echo "🔄 Executing additional just commands..."
-          
-          # Execute other useful commands that actually exist in justfile
-          ADDITIONAL_COMMANDS="lint format deploy cyclonedx-report"
-          
-          for cmd in $ADDITIONAL_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
-              echo "🔄 Executing: just $cmd"
-              just $cmd || echo "⚠️  Command 'just $cmd' failed but continuing..."
-            else
-              echo "⚠️  Command '$cmd' not found in justfile, skipping"
             fi
           done
           
@@ -100,7 +80,7 @@ jobs:
     steps:
       - run: |
           echo "📊 EXECUTION LAYER SUMMARY"
-          echo "✅ Dynamic just command execution completed"
-          echo "✅ Commands executed from justfile"
+          echo "✅ All justfile commands executed dynamically"
+          echo "✅ No hardcoded commands used"
           echo "✅ Build artifacts uploaded"
-          echo "✅ All core commands processed"
+          echo "✅ Pipeline driven entirely by justfile content"
