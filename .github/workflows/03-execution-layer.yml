@@ -34,16 +34,16 @@ jobs:
         run: |
           echo "🔄 Executing core just commands..."
           
-          # Get all available commands
-          CI_COMMANDS=$(just --list | grep -v "Available recipes:" | tr '\n' ' ')
-          echo "Found commands: $CI_COMMANDS"
+          # Get all available commands (cleaner approach)
+          echo "📋 Available commands from justfile:"
+          just --list
           
           # Define core commands that should always run in CI
           CORE_COMMANDS="detect status build test clean mvn-validate coverage"
           
           # Execute each core command if it exists
           for cmd in $CORE_COMMANDS; do
-            if just --list | grep -q "^$cmd$"; then
+            if just --list | grep -q "$cmd"; then
               echo "🔄 Executing: just $cmd"
               just $cmd
               if [ $? -ne 0 ]; then
@@ -63,9 +63,11 @@ jobs:
           ADDITIONAL_COMMANDS="lint format security package docs"
           
           for cmd in $ADDITIONAL_COMMANDS; do
-            if just --list | grep -q "^$cmd$"; then
+            if just --list | grep -q "$cmd"; then
               echo "🔄 Executing: just $cmd"
               just $cmd || echo "⚠️  Command 'just $cmd' failed but continuing..."
+            else
+              echo "⚠️  Command '$cmd' not found in justfile, skipping"
             fi
           done
           
