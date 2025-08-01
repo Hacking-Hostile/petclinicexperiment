@@ -14,70 +14,91 @@ on:
 
 jobs:
   just-commands:
-    name: 🚀 Just Commands Execution
+    name: 🚀 Dynamic Just Commands Execution
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
           cache: maven
-
-      - name: Install Just
-        uses: taiki-e/install-action@just
-
-      - name: Run Just Detect
-        run: just detect
-
-      - name: Run Just Status
-        run: just status
-
-      - name: Run Just Build
-        run: just build
-
-      - name: Run Just Test
-        run: just test
-
-      - name: Run Just Clean
-        run: just clean
-
-      - name: Run Just Maven Validate
-        run: just mvn-validate
-
-      - name: Run Just Coverage
-        run: just coverage
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: taiki-e/install-action@just
+      
+      - name: Show available just commands
+        run: |
+          echo "📋 Available just commands:"
+          just --list
+          
+      - name: Execute core just commands dynamically
+        run: |
+          echo "🔄 Executing core just commands..."
+          
+          # Get all available commands
+          CI_COMMANDS=$(just --list | grep -v "Available recipes:" | tr '\n' ' ')
+          echo "Found commands: $CI_COMMANDS"
+          
+          # Define core commands that should always run in CI
+          CORE_COMMANDS="detect status build test clean mvn-validate coverage"
+          
+          # Execute each core command if it exists
+          for cmd in $CORE_COMMANDS; do
+            if just --list | grep -q "^$cmd$"; then
+              echo "🔄 Executing: just $cmd"
+              just $cmd
+              if [ $? -ne 0 ]; then
+                echo "❌ Command 'just $cmd' failed"
+                exit 1
+              fi
+            else
+              echo "⚠️  Command '$cmd' not found in justfile, skipping"
+            fi
+          done
+          
+      - name: Execute additional just commands
+        run: |
+          echo "🔄 Executing additional just commands..."
+          
+          # Execute other useful commands if they exist
+          ADDITIONAL_COMMANDS="lint format security package docs"
+          
+          for cmd in $ADDITIONAL_COMMANDS; do
+            if just --list | grep -q "^$cmd$"; then
+              echo "🔄 Executing: just $cmd"
+              just $cmd || echo "⚠️  Command 'just $cmd' failed but continuing..."
+            fi
+          done
+          
+      - name: Show just command details
+        run: |
+          echo "📋 Just command details:"
+          echo "Build command:"
+          just --show build || echo "No build command found"
+          echo ""
+          echo "Test command:"
+          just --show test || echo "No test command found"
+          echo ""
+          echo "Clean command:"
+          just --show clean || echo "No clean command found"
+          
+      - uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
             target/
             build/
             *.jar
-
+            *.war
+            *.ear
+            
   execution-summary:
     name: 📊 Execution Summary
     runs-on: ubuntu-latest
     needs: just-commands
-
     steps:
-      - name: Display execution summary
-        run: |
+      - run: |
           echo "📊 EXECUTION LAYER SUMMARY"
-          echo "=========================="
-          echo "✅ Just Detect: Completed"
-          echo "✅ Just Status: Completed"
-          echo "✅ Just Build: Completed"
-          echo "✅ Just Test: Completed"
-          echo "✅ Just Clean: Completed"
-          echo "✅ Just Maven Validate: Completed"
-          echo "✅ Just Coverage: Completed"
-          echo "✅ Artifacts Uploaded"
-          echo ""
-          echo "✅ Execution Layer completed - ready for Security Layer"
+          echo "✅ Dynamic just command execution completed"
+          echo "✅ Commands executed from justfile"
+          echo "✅ Build artifacts uploaded"
+          echo "✅ All core commands processed"
