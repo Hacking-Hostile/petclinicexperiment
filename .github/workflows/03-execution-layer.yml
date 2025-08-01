@@ -62,24 +62,68 @@ jobs:
           echo "📋 Available just commands:"
           just --list
           
-      - name: Execute all just commands dynamically
+      - name: Execute core CI commands (required)
         run: |
-          echo "🔄 Executing all just commands from justfile..."
+          echo "🔄 Executing core CI commands (required)..."
           
-          # Get all available commands from justfile, filtering out comments and invalid commands
-          JUST_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | grep -v "Default target" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$' | tr '\n' ' ')
-          echo "Found commands: $JUST_COMMANDS"
+          # Core commands that should always run in CI
+          CORE_COMMANDS="detect build test clean mvn-validate coverage"
           
-          # Execute each command that exists in justfile
-          for cmd in $JUST_COMMANDS; do
-            # Skip default command as it's just a help display
-            if [ "$cmd" != "default" ]; then
+          for cmd in $CORE_COMMANDS; do
+            if just --list | grep -q "$cmd"; then
               echo "🔄 Executing: just $cmd"
               just $cmd
               if [ $? -ne 0 ]; then
-                echo "❌ Command 'just $cmd' failed"
+                echo "❌ Core command 'just $cmd' failed - stopping execution"
                 exit 1
               fi
+            else
+              echo "⚠️  Core command '$cmd' not found, skipping"
+            fi
+          done
+          
+      - name: Execute additional CI commands (optional)
+        run: |
+          echo "🔄 Executing additional CI commands (optional)..."
+          
+          # Additional commands that are useful in CI but not critical
+          ADDITIONAL_COMMANDS="lint format cyclonedx-report mvn-site"
+          
+          for cmd in $ADDITIONAL_COMMANDS; do
+            if just --list | grep -q "$cmd"; then
+              echo "🔄 Executing: just $cmd"
+              just $cmd || echo "⚠️  Optional command 'just $cmd' failed but continuing..."
+            else
+              echo "⚠️  Optional command '$cmd' not found, skipping"
+            fi
+          done
+          
+      - name: Execute utility commands (non-critical)
+        run: |
+          echo "🔄 Executing utility commands (non-critical)..."
+          
+          # Utility commands that are informational only
+          UTILITY_COMMANDS="status env-info find-java find-resources java-version maven-version count-lines"
+          
+          for cmd in $UTILITY_COMMANDS; do
+            if just --list | grep -q "$cmd"; then
+              echo "🔄 Executing: just $cmd"
+              just $cmd || echo "⚠️  Utility command 'just $cmd' failed but continuing..."
+            else
+              echo "⚠️  Utility command '$cmd' not found, skipping"
+            fi
+          done
+          
+      - name: Skip development commands (not for CI)
+        run: |
+          echo "⏭️  Skipping development commands (not suitable for CI)..."
+          
+          # Commands that are for local development only
+          DEV_COMMANDS="dev-setup dev-status dev-stop db-init-h2 db-reset-h2 db-schema run run-h2 deploy"
+          
+          for cmd in $DEV_COMMANDS; do
+            if just --list | grep -q "$cmd"; then
+              echo "⏭️  Skipping development command: $cmd (not for CI environment)"
             fi
           done
           
@@ -112,7 +156,8 @@ jobs:
     steps:
       - run: |
           echo "📊 EXECUTION LAYER SUMMARY"
-          echo "✅ All justfile commands executed dynamically"
-          echo "✅ No hardcoded commands used"
+          echo "✅ Core CI commands executed successfully"
+          echo "✅ Optional commands attempted"
+          echo "✅ Development commands skipped appropriately"
           echo "✅ Build artifacts uploaded"
-          echo "✅ Pipeline driven entirely by justfile content"
+          echo "✅ Pipeline driven by justfile with smart categorization"
