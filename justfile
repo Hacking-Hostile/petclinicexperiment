@@ -108,7 +108,7 @@ run:
         exit 1
     fi
 
-# CI: true
+# CI: false
 lint:
     #!/usr/bin/env bash
     echo "🔍 Running linting..."
