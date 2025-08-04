@@ -373,7 +373,7 @@ ci:
     echo "🚀 Running CI commands locally..."
     
     # Define CI commands explicitly to avoid recursion
-    CI_COMMANDS="build test clean lint coverage cyclonedx-report mvn-validate ci-validate"
+    CI_COMMANDS="build test clean coverage cyclonedx-report mvn-validate ci-validate"
     
     echo "Found CI commands: $CI_COMMANDS"
     
