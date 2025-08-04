@@ -457,6 +457,78 @@ ci-validate:
     echo "✅ All CI commands have stage declarations"
 
 # CI: false
+validate-justfile:
+    #!/usr/bin/env bash
+    echo "🔍 Comprehensive justfile validation..."
+    echo "======================================"
+    
+    # Get all commands
+    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
+    
+    # Validation counters
+    TOTAL_COMMANDS=0
+    CI_COMMANDS=0
+    LOCAL_COMMANDS=0
+    STAGED_COMMANDS=0
+    ERRORS=0
+    
+    echo "📋 Analyzing commands..."
+    
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            TOTAL_COMMANDS=$((TOTAL_COMMANDS + 1))
+            
+            # Check CI declaration
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
+                CI_COMMANDS=$((CI_COMMANDS + 1))
+                echo "✅ $cmd: CI command"
+                
+                # Check stage declaration for CI commands
+                if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
+                    STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
+                    if [[ "$STAGE" =~ ^[1-6]$ ]]; then
+                        STAGED_COMMANDS=$((STAGED_COMMANDS + 1))
+                        echo "   📍 Stage: $STAGE"
+                    else
+                        echo "   ❌ Invalid stage: $STAGE (must be 1-6)"
+                        ERRORS=$((ERRORS + 1))
+                    fi
+                else
+                    echo "   ❌ Missing STAGE declaration"
+                    ERRORS=$((ERRORS + 1))
+                fi
+                
+            elif grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: false"; then
+                LOCAL_COMMANDS=$((LOCAL_COMMANDS + 1))
+                echo "✅ $cmd: Local command"
+            else
+                echo "❌ $cmd: Missing CI declaration"
+                ERRORS=$((ERRORS + 1))
+            fi
+        fi
+    done
+    
+    echo ""
+    echo "📊 VALIDATION SUMMARY"
+    echo "===================="
+    echo "Total commands: $TOTAL_COMMANDS"
+    echo "CI commands: $CI_COMMANDS"
+    echo "Local commands: $LOCAL_COMMANDS"
+    echo "Staged commands: $STAGED_COMMANDS"
+    echo "Errors: $ERRORS"
+    
+    if [ $ERRORS -eq 0 ]; then
+        echo ""
+        echo "✅ All validations passed!"
+        echo "✅ Justfile is ready for CI/CD pipeline"
+    else
+        echo ""
+        echo "❌ Validation failed with $ERRORS errors"
+        echo "💡 Fix the issues above before pushing"
+        exit 1
+    fi
+
+# CI: false
 ci-commands:
     #!/usr/bin/env bash
     echo "📋 CI-suitable commands:"
@@ -512,4 +584,44 @@ stage-commands:
         echo "✅ Stage $STAGE commands: $STAGE_COMMANDS"
     else
         echo "❌ No commands found for stage $STAGE"
-    fi 
+    fi
+
+# CI: false
+get-stage-info:
+    #!/usr/bin/env bash
+    echo "📋 Dynamic stage information for pipeline..."
+    
+    # Get all commands
+    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
+    
+    # Initialize stage arrays
+    declare -A STAGE_COMMANDS
+    for i in {1..6}; do
+        STAGE_COMMANDS[$i]=""
+    done
+    
+    # Parse commands and their stages
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            # Check if command is CI and has stage
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
+                if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
+                    STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
+                    if [[ "$STAGE" =~ ^[1-6]$ ]]; then
+                        STAGE_COMMANDS[$STAGE]="${STAGE_COMMANDS[$STAGE]} $cmd"
+                    fi
+                fi
+            fi
+        fi
+    done
+    
+    # Output stage information
+    echo "STAGE_INFO_START"
+    for i in {1..6}; do
+        if [ -n "${STAGE_COMMANDS[$i]}" ]; then
+            echo "STAGE_${i}:${STAGE_COMMANDS[$i]}"
+        else
+            echo "STAGE_${i}:"
+        fi
+    done
+    echo "STAGE_INFO_END" 

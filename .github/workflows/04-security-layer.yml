@@ -56,13 +56,14 @@ jobs:
         run: |
           echo "🚀 Running stage 4 commands..."
           
-          # Get stage 4 commands
-          STAGE_COMMANDS=$(just stage-commands 4 2>&1 | grep "Stage 4 commands:" | sed 's/✅ Stage 4 commands: //')
+          # Get stage 4 commands dynamically
+          STAGE_INFO=$(just get-stage-info)
+          STAGE_4_COMMANDS=$(echo "$STAGE_INFO" | grep "STAGE_4:" | sed 's/STAGE_4://')
           
-          echo "Found stage 4 commands: $STAGE_COMMANDS"
+          echo "Found stage 4 commands: $STAGE_4_COMMANDS"
           
           # Execute each stage 4 command
-          for cmd in $STAGE_COMMANDS; do
+          for cmd in $STAGE_4_COMMANDS; do
             if [ -n "$cmd" ]; then
               echo "🔄 Executing stage 4 command: just $cmd"
               just $cmd
