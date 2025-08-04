@@ -1,5 +1,5 @@
 # Multi-Language CI/CD Pipeline - Just Commands
-# Spring PetClinic Project - Final Cleaned Version
+# Universal Project Template - Language Agnostic
 
 # CI: false
 default:
@@ -37,7 +37,7 @@ get-mvn-cmd:
 # CI: true
 build:
     #!/usr/bin/env bash
-    echo "🔨 Building Spring PetClinic application..."
+    echo "🔨 Building application..."
     if [ -f "pom.xml" ]; then
         echo "📦 Detected Maven project"
         MVN_CMD=$(just get-mvn-cmd)
@@ -94,7 +94,7 @@ clean:
 # CI: false
 run:
     #!/usr/bin/env bash
-    echo "🖥️ Running Spring PetClinic application..."
+    echo "🖥️ Running application..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven application"
         MVN_CMD=$(just get-mvn-cmd)
@@ -263,7 +263,7 @@ status:
     echo "Git status:"
     git status --porcelain | wc -l | xargs echo "Modified files:"
     echo "Build status:"
-    if [ -d "target" ] && ls target/spring-petclinic-*.jar 1> /dev/null 2>&1; then
+    if [ -d "target" ] && ls target/*.jar 1> /dev/null 2>&1; then
         echo "✅ Application built successfully"
     else
         echo "❌ Application not built"
