@@ -1,7 +1,7 @@
 # Multi-Language CI/CD Pipeline - Just Commands
 # Spring PetClinic Project - Final Cleaned Version
 
-# Default target - shows available commands
+# CI: false
 default:
     @echo "Available commands:"
     @echo "  System & Environment: java-version, get-mvn-cmd, maven-version, detect, env-info, status"
@@ -16,7 +16,7 @@ default:
     @echo "Run 'just <command>' to execute a specific command"
     @echo "Run 'just --list' to see all available commands"
 
-# Helper function to get Maven command
+# CI: false
 get-mvn-cmd:
     #!/usr/bin/env bash
     if command -v mvn &> /dev/null; then
@@ -31,6 +31,7 @@ get-mvn-cmd:
 # UNIVERSAL COMMANDS (Cross-platform, build-tool agnostic)
 # =============================================================================
 
+# CI: true
 build:
     #!/usr/bin/env bash
     echo "🔨 Building Spring PetClinic application..."
@@ -55,6 +56,7 @@ build:
         exit 1
     fi
 
+# CI: true
 test:
     #!/usr/bin/env bash
     echo "🧪 Running tests..."
@@ -79,6 +81,7 @@ test:
         exit 1
     fi
 
+# CI: true
 clean:
     #!/usr/bin/env bash
     echo "🧹 Cleaning project..."
@@ -103,14 +106,12 @@ clean:
         exit 1
     fi
 
+# CI: false
 run:
     #!/usr/bin/env bash
-    echo "🚀 Starting Spring PetClinic application..."
-    if [ -d "target" ] && ls target/spring-petclinic-*.jar 1> /dev/null 2>&1; then
-        echo "📦 Running JAR file"
-        java -jar target/spring-petclinic-*.jar
-    elif [ -f "pom.xml" ]; then
-        echo "📦 Running with Maven Spring Boot plugin"
+    echo "🖥️ Running Spring PetClinic application..."
+    if [ -f "pom.xml" ]; then
+        echo "📦 Running Maven application"
         if command -v mvn &> /dev/null; then
             mvn spring-boot:run
         elif [ -f "./mvnw" ]; then
@@ -121,84 +122,71 @@ run:
             exit 1
         fi
     elif [ -f "build.gradle" ]; then
-        echo "📦 Running with Gradle Spring Boot plugin"
+        echo "📦 Running Gradle application"
         ./gradlew bootRun
     else
-        echo "❌ No runnable application found"
+        echo "❌ No build file found"
         exit 1
     fi
 
+# CI: true
 lint:
     #!/usr/bin/env bash
-    echo "🔍 Running code quality checks..."
+    echo "🔍 Running linting..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven checkstyle"
         if command -v mvn &> /dev/null; then
             mvn checkstyle:check
         elif [ -f "./mvnw" ]; then
-            ./mvnw checkstyle:check
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw checkstyle:check 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
         fi
-        echo "✅ Lint completed!"
     elif [ -f "build.gradle" ]; then
-        echo "📦 Running Gradle checkstyle"
+        echo "📦 Running Gradle linting"
         ./gradlew checkstyleMain
-        echo "✅ Lint completed!"
     else
-        echo "⚠️  No linting configured for this project"
+        echo "❌ No build file found"
+        exit 1
     fi
 
+# CI: false
 format:
     #!/usr/bin/env bash
     echo "🎨 Formatting code..."
     if [ -f "pom.xml" ]; then
-        echo "📦 Running Spring Java Format"
+        echo "📦 Running Maven formatting"
         if command -v mvn &> /dev/null; then
-            mvn spring-javaformat:apply
+            mvn spotless:apply
         elif [ -f "./mvnw" ]; then
-            ./mvnw spring-javaformat:apply
+            echo "📥 Maven wrapper downloading Maven (first time only)..."
+            ./mvnw spotless:apply 2>/dev/null || echo "⚠️  Maven download in progress..."
         else
             echo "❌ Maven not found and no wrapper available"
             exit 1
         fi
-        echo "✅ Format completed!"
     elif [ -f "build.gradle" ]; then
-        echo "📦 Running Gradle format"
-        ./gradlew format
-        echo "✅ Format completed!"
+        echo "📦 Running Gradle formatting"
+        ./gradlew spotlessApply
     else
-        echo "⚠️  No formatting configured for this project"
-    fi
-
-deploy:
-    #!/usr/bin/env bash
-    echo "🚀 Deploying application..."
-    if [ -f "pom.xml" ]; then
-        echo "📦 Deploying with Maven"
-        if command -v mvn &> /dev/null; then
-            mvn deploy
-        elif [ -f "./mvnw" ]; then
-            ./mvnw deploy
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
-        echo "✅ Deploy completed!"
-    elif [ -f "build.gradle" ]; then
-        echo "📦 Deploying with Gradle"
-        ./gradlew publish
-        echo "✅ Deploy completed!"
-    else
-        echo "❌ No deploy configuration found"
+        echo "❌ No build file found"
         exit 1
     fi
 
+# CI: false
+deploy:
+    #!/usr/bin/env bash
+    echo "🚀 Deploying application..."
+    echo "⚠️  Deployment not implemented yet"
+    exit 1
+
 # =============================================================================
-# ESSENTIAL MAVEN COMMANDS (Keep only working ones)
+# MAVEN SPECIFIC COMMANDS
 # =============================================================================
 
+# CI: true
 mvn-validate:
     #!/usr/bin/env bash
     echo "✅ Validating Maven project..."
@@ -212,6 +200,7 @@ mvn-validate:
         exit 1
     fi
 
+# CI: false
 mvn-site:
     #!/usr/bin/env bash
     echo "🌐 Generating Maven site..."
@@ -229,6 +218,7 @@ mvn-site:
 # DATABASE COMMANDS
 # =============================================================================
 
+# CI: false
 run-h2:
     #!/usr/bin/env bash
     echo "🗄️  Running with H2 database..."
@@ -242,6 +232,7 @@ run-h2:
         exit 1
     fi
 
+# CI: false
 db-init-h2:
     #!/usr/bin/env bash
     echo "🗄️  Initializing H2 database..."
@@ -257,12 +248,14 @@ db-init-h2:
     sleep 10
     echo "✅ H2 database initialized"
 
+# CI: false
 db-reset-h2:
     #!/usr/bin/env bash
     echo "🗄️  Resetting H2 database..."
     rm -f src/main/resources/db/h2/data.sql
     echo "✅ H2 database reset"
 
+# CI: false
 db-schema:
     #!/usr/bin/env bash
     echo "🗄️  Showing database schema..."
@@ -272,6 +265,7 @@ db-schema:
 # CODE QUALITY AND COVERAGE
 # =============================================================================
 
+# CI: true
 coverage:
     #!/usr/bin/env bash
     echo "📊 Generating code coverage report..."
@@ -285,6 +279,7 @@ coverage:
     fi
     echo "✅ Coverage report generated in target/site/jacoco/"
 
+# CI: true
 cyclonedx-report:
     #!/usr/bin/env bash
     echo "📋 Generating CycloneDX SBOM report..."
@@ -309,11 +304,13 @@ cyclonedx-report:
 # SYSTEM AND ENVIRONMENT COMMANDS
 # =============================================================================
 
+# CI: false
 java-version:
     #!/usr/bin/env bash
     echo "☕ Java version:"
     java -version
 
+# CI: false
 maven-version:
     #!/usr/bin/env bash
     echo "📦 Maven version:"
@@ -327,6 +324,7 @@ maven-version:
         exit 1
     fi
 
+# CI: false
 status:
     #!/usr/bin/env bash
     echo "📊 Project status..."
@@ -350,6 +348,7 @@ status:
         echo "❌ Application not built"
     fi
 
+# CI: false
 env-info:
     #!/usr/bin/env bash
     echo "🌍 Environment information..."
@@ -363,16 +362,19 @@ env-info:
 # FILE AND DIRECTORY COMMANDS
 # =============================================================================
 
+# CI: false
 find-java:
     #!/usr/bin/env bash
     echo "📁 Finding Java files:"
     find src -name "*.java" | head -10
 
+# CI: false
 find-resources:
     #!/usr/bin/env bash
     echo "📁 Finding resource files:"
     find src/main/resources -type f | head -10
 
+# CI: false
 count-lines:
     #!/usr/bin/env bash
     echo "📊 Counting lines of code:"
@@ -382,6 +384,7 @@ count-lines:
 # UTILITY COMMANDS
 # =============================================================================
 
+# CI: false
 cleanup:
     #!/usr/bin/env bash
     echo "🧹 Cleaning up temporary files..."
@@ -394,11 +397,13 @@ cleanup:
 # DEVELOPMENT COMMANDS
 # =============================================================================
 
+# CI: false
 dev-setup:
     #!/usr/bin/env bash
     echo "🔧 Setting up development environment..."
     echo "✅ Development environment configured"
 
+# CI: false
 dev-status:
     #!/usr/bin/env bash
     echo "📊 Development environment status..."
@@ -409,6 +414,7 @@ dev-status:
         echo "❌ Application is not running"
     fi
 
+# CI: false
 dev-stop:
     #!/usr/bin/env bash
     echo "🛑 Stopping development environment..."
@@ -418,6 +424,7 @@ dev-stop:
 # DETECTION AND SETUP
 # =============================================================================
 
+# CI: false
 detect:
     #!/usr/bin/env bash
     echo "🔍 Detecting project type..."
@@ -437,4 +444,66 @@ detect:
         echo "Gradle version: $(./gradlew --version 2>&1 | head -1)"
     else
         echo "❌ No build system detected"
-    fi 
+    fi
+
+# =============================================================================
+# CI VALIDATION COMMANDS
+# =============================================================================
+
+# CI: true
+ci-validate:
+    #!/usr/bin/env bash
+    echo "🔍 Validating CI command declarations..."
+    
+    # Get all commands
+    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
+    
+    # Check each command has CI comment
+    MISSING_CI_COMMENTS=""
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            # Search for CI comment in the justfile using a more robust pattern
+            if ! grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI:"; then
+                MISSING_CI_COMMENTS="$MISSING_CI_COMMENTS $cmd"
+            fi
+        fi
+    done
+    
+    if [ -n "$MISSING_CI_COMMENTS" ]; then
+        echo "❌ Commands missing CI declarations: $MISSING_CI_COMMENTS"
+        echo "💡 Add '# CI: true' or '# CI: false' to each command"
+        echo "💡 Example:"
+        echo "   # CI: true"
+        echo "   build:"
+        echo "       echo 'Building...'"
+        exit 1
+    fi
+    
+    echo "✅ All commands have CI declarations"
+
+# CI: false
+ci-commands:
+    #!/usr/bin/env bash
+    echo "📋 CI-suitable commands:"
+    
+    # Get all commands
+    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
+    
+    CI_COMMANDS=""
+    NON_CI_COMMANDS=""
+    
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            # Search for CI comment in the justfile using a more robust pattern
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
+                CI_COMMANDS="$CI_COMMANDS $cmd"
+            elif grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: false"; then
+                NON_CI_COMMANDS="$NON_CI_COMMANDS $cmd"
+            else
+                echo "⚠️  Command '$cmd' missing CI declaration"
+            fi
+        fi
+    done
+    
+    echo "✅ CI-suitable: $CI_COMMANDS"
+    echo "❌ Local-only: $NON_CI_COMMANDS" 

@@ -1,7 +1,7 @@
 # Multi-Language CI/CD Pipeline - Execution Layer
 # This workflow implements ONLY the Execution Layer (Just Commands) from the architecture diagram
 
-name: 03 - Execution Layer
+name: 03-Execution Layer
 
 # =============================================================================
 # EXECUTION LAYER - Just Commands
@@ -9,15 +9,17 @@ name: 03 - Execution Layer
 
 on:
   workflow_run:
-    workflows: ["02 - Orchestration Layer"]
-    types: [completed]
+    workflows: ["02-Orchestration Layer"]
+    types:
+      - completed
 
 jobs:
   just-commands:
-    name: 🚀 Dynamic Just Commands Execution
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           # Include Maven wrapper files
           fetch-depth: 0
@@ -55,109 +57,58 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       
-      - uses: taiki-e/install-action@just
+      - name: Setup Just
+        uses: taiki-e/install-action@just
       
-      - name: Show available just commands
+      - name: Validate CI Commands
         run: |
-          echo "📋 Available just commands:"
-          just --list
-          
-      - name: Execute core CI commands (required)
+          echo "🔍 Validating CI command declarations..."
+          just ci-validate
+          if [ $? -ne 0 ]; then
+            echo "❌ CI validation failed - missing CI declarations"
+            exit 1
+          fi
+          echo "✅ CI validation passed"
+      
+      - name: Show CI Commands
         run: |
-          echo "🔄 Executing core CI commands (required)..."
+          echo "📋 Available CI commands:"
+          just ci-commands
+      
+      - name: Execute CI Commands Only
+        run: |
+          echo "🚀 Running CI-suitable commands only..."
           
-          # Core commands that should always run in CI
-          CORE_COMMANDS="detect build test clean mvn-validate coverage"
+          # Get CI-suitable commands
+          CI_COMMANDS=$(just ci-commands 2>&1 | grep "CI-suitable:" | sed 's/✅ CI-suitable: //')
           
-          for cmd in $CORE_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
-              echo "🔄 Executing: just $cmd"
+          echo "Found CI commands: $CI_COMMANDS"
+          
+          # Execute each CI command
+          for cmd in $CI_COMMANDS; do
+            if [ -n "$cmd" ]; then
+              echo "🔄 Executing CI command: just $cmd"
               just $cmd
               if [ $? -ne 0 ]; then
-                echo "❌ Core command 'just $cmd' failed - stopping execution"
+                echo "❌ CI command failed: $cmd"
                 exit 1
               fi
-            else
-              echo "⚠️  Core command '$cmd' not found, skipping"
             fi
           done
           
-      - name: Execute additional CI commands (optional)
-        run: |
-          echo "🔄 Executing additional CI commands (optional)..."
-          
-          # Additional commands that are useful in CI but not critical
-          ADDITIONAL_COMMANDS="lint format cyclonedx-report mvn-site"
-          
-          for cmd in $ADDITIONAL_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
-              echo "🔄 Executing: just $cmd"
-              just $cmd || echo "⚠️  Optional command 'just $cmd' failed but continuing..."
-            else
-              echo "⚠️  Optional command '$cmd' not found, skipping"
-            fi
-          done
-          
-      - name: Execute utility commands (non-critical)
-        run: |
-          echo "🔄 Executing utility commands (non-critical)..."
-          
-          # Utility commands that are informational only
-          UTILITY_COMMANDS="status env-info find-java find-resources java-version maven-version count-lines"
-          
-          for cmd in $UTILITY_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
-              echo "🔄 Executing: just $cmd"
-              just $cmd || echo "⚠️  Utility command 'just $cmd' failed but continuing..."
-            else
-              echo "⚠️  Utility command '$cmd' not found, skipping"
-            fi
-          done
-          
-      - name: Skip development commands (not for CI)
-        run: |
-          echo "⏭️  Skipping development commands (not suitable for CI)..."
-          
-          # Commands that are for local development only
-          DEV_COMMANDS="dev-setup dev-status dev-stop db-init-h2 db-reset-h2 db-schema run run-h2 deploy"
-          
-          for cmd in $DEV_COMMANDS; do
-            if just --list | grep -q "$cmd"; then
-              echo "⏭️  Skipping development command: $cmd (not for CI environment)"
-            fi
-          done
-          
-      - name: Show just command details
-        run: |
-          echo "📋 Just command details:"
-          echo "Build command:"
-          just --show build || echo "No build command found"
-          echo ""
-          echo "Test command:"
-          just --show test || echo "No test command found"
-          echo ""
-          echo "Clean command:"
-          just --show clean || echo "No clean command found"
-          
-      - uses: actions/upload-artifact@v4
+          echo "✅ All CI commands completed successfully!"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
             target/
             build/
-            *.jar
-            *.war
-            *.ear
-            
-  execution-summary:
-    name: 📊 Execution Summary
-    runs-on: ubuntu-latest
-    needs: just-commands
-    steps:
-      - run: |
-          echo "📊 EXECUTION LAYER SUMMARY"
-          echo "✅ Core CI commands executed successfully"
-          echo "✅ Optional commands attempted"
-          echo "✅ Development commands skipped appropriately"
+          retention-days: 1
+      
+      - name: Show execution summary
+        run: |
+          echo "✅ CI execution completed"
           echo "✅ Build artifacts uploaded"
-          echo "✅ Pipeline driven by justfile with smart categorization"
+          echo "✅ Pipeline driven by CI-suitable commands only"
