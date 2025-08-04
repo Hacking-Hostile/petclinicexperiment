@@ -454,8 +454,8 @@ validate:
             TOTAL_COMMANDS=$((TOTAL_COMMANDS + 1))
             
             # Check if command has both CI and STAGE declarations
-            HAS_CI=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "CI:" || echo "0")
-            HAS_STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "STAGE:" || echo "0")
+            HAS_CI=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "^# CI:" || echo "0")
+            HAS_STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "^# STAGE:" || echo "0")
             
             if [ "$HAS_CI" -eq 0 ] || [ "$HAS_STAGE" -eq 0 ]; then
                 echo "❌ $cmd: Missing CI or STAGE declaration"
@@ -463,9 +463,9 @@ validate:
                 continue
             fi
             
-            # Get CI value (take the first one if multiple)
-            CI_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "CI:" | head -1 | sed 's/.*CI: //')
-            STAGE_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | head -1 | sed 's/.*STAGE: //')
+            # Get CI value (take the first one if multiple, but only from comment lines)
+            CI_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "^# CI:" | head -1 | sed 's/.*CI: //')
+            STAGE_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "^# STAGE:" | head -1 | sed 's/.*STAGE: //')
             
             # Validate CI value
             if [ "$CI_VALUE" != "true" ] && [ "$CI_VALUE" != "false" ]; then
@@ -481,15 +481,30 @@ validate:
                 continue
             fi
             
-            # Validate consistency: Stage 0 should be CI: false, Stages 1-6 should be CI: true
-            if [ "$STAGE_VALUE" -eq 0 ] && [ "$CI_VALUE" != "false" ]; then
-                echo "❌ $cmd: Stage 0 must have CI: false (got CI: $CI_VALUE)"
+            # Validate bidirectional consistency
+            if [ "$STAGE_VALUE" -eq 0 ]; then
+                if [ "$CI_VALUE" != "false" ]; then
+                    echo "❌ $cmd: Stage 0 must have CI: false (got CI: $CI_VALUE)"
+                    ERRORS=$((ERRORS + 1))
+                    continue
+                fi
+            elif [ "$STAGE_VALUE" -ge 1 ] && [ "$STAGE_VALUE" -le 6 ]; then
+                if [ "$CI_VALUE" != "true" ]; then
+                    echo "❌ $cmd: Stages 1-6 must have CI: true (got CI: $CI_VALUE)"
+                    ERRORS=$((ERRORS + 1))
+                    continue
+                fi
+            fi
+            
+            # Additional validation: CI: false must be Stage 0, CI: true must be Stages 1-6
+            if [ "$CI_VALUE" = "false" ] && [ "$STAGE_VALUE" -ne 0 ]; then
+                echo "❌ $cmd: CI: false must have Stage 0 (got Stage: $STAGE_VALUE)"
                 ERRORS=$((ERRORS + 1))
                 continue
             fi
             
-            if [ "$STAGE_VALUE" -ge 1 ] && [ "$STAGE_VALUE" -le 6 ] && [ "$CI_VALUE" != "true" ]; then
-                echo "❌ $cmd: Stages 1-6 must have CI: true (got CI: $CI_VALUE)"
+            if [ "$CI_VALUE" = "true" ] && [ "$STAGE_VALUE" -lt 1 ] || [ "$STAGE_VALUE" -gt 6 ]; then
+                echo "❌ $cmd: CI: true must have Stage 1-6 (got Stage: $STAGE_VALUE)"
                 ERRORS=$((ERRORS + 1))
                 continue
             fi
@@ -534,8 +549,12 @@ validate:
         echo ""
         echo "📋 Rules:"
         echo "   - All commands must have both # CI: true/false and # STAGE: 0-6"
-        echo "   - Stage 0 = Local only (CI: false)"
-        echo "   - Stages 1-6 = CI commands (CI: true)"
+        echo "   - Stage 0 ↔ CI: false (bidirectional consistency)"
+        echo "   - Stages 1-6 ↔ CI: true (bidirectional consistency)"
+        echo "   - If Stage 0, CI must be false"
+        echo "   - If CI false, Stage must be 0"
+        echo "   - If Stages 1-6, CI must be true"
+        echo "   - If CI true, Stage must be 1-6"
         exit 1
     fi
 
@@ -605,6 +624,8 @@ stage-commands:
     else
         echo "❌ No commands found for stage $STAGE"
     fi
+
+
 
 
 
