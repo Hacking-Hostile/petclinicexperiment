@@ -2,6 +2,7 @@
 # Universal Project Template - Language Agnostic
 
 # CI: false
+# STAGE: 0
 default:
     @echo "Available commands:"
     @echo "  System & Environment: java-version, get-mvn-cmd, maven-version, detect, env-info, status"
@@ -17,6 +18,7 @@ default:
     @echo "Run 'just --list' to see all available commands"
 
 # CI: false
+# STAGE: 0
 get-mvn-cmd:
     #!/usr/bin/env bash
     # Check for local Maven installation first
@@ -95,6 +97,7 @@ clean:
     fi
 
 # CI: false
+# STAGE: 0
 run:
     #!/usr/bin/env bash
     echo "🖥️ Running application..."
@@ -112,6 +115,7 @@ run:
     fi
 
 # CI: false
+# STAGE: 0
 lint:
     #!/usr/bin/env bash
     echo "🔍 Running linting..."
@@ -129,6 +133,7 @@ lint:
     fi
 
 # CI: false
+# STAGE: 0
 format:
     #!/usr/bin/env bash
     echo "🎨 Formatting code..."
@@ -146,6 +151,7 @@ format:
     fi
 
 # CI: false
+# STAGE: 0
 deploy:
     #!/usr/bin/env bash
     echo "🚀 Deploying application..."
@@ -166,6 +172,7 @@ mvn-validate:
     $MVN_CMD validate
 
 # CI: false
+# STAGE: 0
 mvn-site:
     #!/usr/bin/env bash
     echo "🌐 Generating Maven site..."
@@ -178,6 +185,7 @@ mvn-site:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 run-h2:
     #!/usr/bin/env bash
     echo "🗄️  Running with H2 database..."
@@ -186,6 +194,7 @@ run-h2:
     $MVN_CMD spring-boot:run -Dspring-boot.run.profiles=h2
 
 # CI: false
+# STAGE: 0
 db-init-h2:
     #!/usr/bin/env bash
     echo "🗄️  Initializing H2 database..."
@@ -196,6 +205,7 @@ db-init-h2:
     echo "✅ H2 database initialized"
 
 # CI: false
+# STAGE: 0
 db-reset-h2:
     #!/usr/bin/env bash
     echo "🗄️  Resetting H2 database..."
@@ -203,6 +213,7 @@ db-reset-h2:
     echo "✅ H2 database reset"
 
 # CI: false
+# STAGE: 0
 db-schema:
     #!/usr/bin/env bash
     echo "🗄️  Showing database schema..."
@@ -243,12 +254,14 @@ cyclonedx-report:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 java-version:
     #!/usr/bin/env bash
     echo "☕ Java version:"
     java -version
 
 # CI: false
+# STAGE: 0
 maven-version:
     #!/usr/bin/env bash
     echo "📦 Maven version:"
@@ -257,6 +270,7 @@ maven-version:
     $MVN_CMD -version
 
 # CI: false
+# STAGE: 0
 status:
     #!/usr/bin/env bash
     echo "📊 Project status..."
@@ -276,6 +290,7 @@ status:
     fi
 
 # CI: false
+# STAGE: 0
 env-info:
     #!/usr/bin/env bash
     echo "🌍 Environment information..."
@@ -290,18 +305,21 @@ env-info:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 find-java:
     #!/usr/bin/env bash
     echo "📁 Finding Java files:"
     find src -name "*.java" | head -10
 
 # CI: false
+# STAGE: 0
 find-resources:
     #!/usr/bin/env bash
     echo "📁 Finding resource files:"
     find src/main/resources -type f | head -10
 
 # CI: false
+# STAGE: 0
 count-lines:
     #!/usr/bin/env bash
     echo "📊 Counting lines of code:"
@@ -312,6 +330,7 @@ count-lines:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 cleanup:
     #!/usr/bin/env bash
     echo "🧹 Cleaning up temporary files..."
@@ -325,12 +344,14 @@ cleanup:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 dev-setup:
     #!/usr/bin/env bash
     echo "🔧 Setting up development environment..."
     echo "✅ Development environment configured"
 
 # CI: false
+# STAGE: 0
 dev-status:
     #!/usr/bin/env bash
     echo "📊 Development environment status..."
@@ -342,6 +363,7 @@ dev-status:
     fi
 
 # CI: false
+# STAGE: 0
 dev-stop:
     #!/usr/bin/env bash
     echo "🛑 Stopping development environment..."
@@ -352,6 +374,7 @@ dev-stop:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 detect:
     #!/usr/bin/env bash
     echo "🔍 Detecting project type..."
@@ -374,6 +397,7 @@ detect:
 # =============================================================================
 
 # CI: false
+# STAGE: 0
 ci:
     #!/usr/bin/env bash
     echo "🚀 Running CI commands locally..."
@@ -403,61 +427,12 @@ ci-validate:
     #!/usr/bin/env bash
     echo "🔍 Validating CI command declarations..."
     
-    # Get all commands
-    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
-    
-    # Check each command has CI comment
-    MISSING_CI_COMMENTS=""
-    for cmd in $ALL_COMMANDS; do
-        if [ "$cmd" != "default" ]; then
-            # Search for CI comment in the justfile using a more robust pattern
-            if ! grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI:"; then
-                MISSING_CI_COMMENTS="$MISSING_CI_COMMENTS $cmd"
-            fi
-        fi
-    done
-    
-    if [ -n "$MISSING_CI_COMMENTS" ]; then
-        echo "❌ Commands missing CI declarations: $MISSING_CI_COMMENTS"
-        echo "💡 Add '# CI: true' or '# CI: false' to each command"
-        echo "💡 Example:"
-        echo "   # CI: true"
-        echo "   build:"
-        echo "       echo 'Building...'"
-        exit 1
-    fi
-    
-    echo "✅ All commands have CI declarations"
-    
-    # Validate stage declarations for CI commands
-    echo "🔍 Validating stage declarations for CI commands..."
-    MISSING_STAGE_COMMENTS=""
-    for cmd in $ALL_COMMANDS; do
-        if [ "$cmd" != "default" ]; then
-            # Check if command is CI and has stage declaration
-            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
-                if ! grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
-                    MISSING_STAGE_COMMENTS="$MISSING_STAGE_COMMENTS $cmd"
-                fi
-            fi
-        fi
-    done
-    
-    if [ -n "$MISSING_STAGE_COMMENTS" ]; then
-        echo "❌ CI commands missing STAGE declarations: $MISSING_STAGE_COMMENTS"
-        echo "💡 Add '# STAGE: X' to each CI command"
-        echo "💡 Example:"
-        echo "   # CI: true"
-        echo "   # STAGE: 3"
-        echo "   build:"
-        echo "       echo 'Building...'"
-        exit 1
-    fi
-    
-    echo "✅ All CI commands have stage declarations"
+    # Use the comprehensive validate command
+    just validate
 
 # CI: false
-validate-justfile:
+# STAGE: 0
+validate:
     #!/usr/bin/env bash
     echo "🔍 Comprehensive justfile validation..."
     echo "======================================"
@@ -478,32 +453,55 @@ validate-justfile:
         if [ "$cmd" != "default" ]; then
             TOTAL_COMMANDS=$((TOTAL_COMMANDS + 1))
             
-            # Check CI declaration
-            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
-                CI_COMMANDS=$((CI_COMMANDS + 1))
-                echo "✅ $cmd: CI command"
-                
-                # Check stage declaration for CI commands
-                if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
-                    STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
-                    if [[ "$STAGE" =~ ^[1-6]$ ]]; then
-                        STAGED_COMMANDS=$((STAGED_COMMANDS + 1))
-                        echo "   📍 Stage: $STAGE"
-                    else
-                        echo "   ❌ Invalid stage: $STAGE (must be 1-6)"
-                        ERRORS=$((ERRORS + 1))
-                    fi
-                else
-                    echo "   ❌ Missing STAGE declaration"
-                    ERRORS=$((ERRORS + 1))
-                fi
-                
-            elif grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: false"; then
-                LOCAL_COMMANDS=$((LOCAL_COMMANDS + 1))
-                echo "✅ $cmd: Local command"
-            else
-                echo "❌ $cmd: Missing CI declaration"
+            # Check if command has both CI and STAGE declarations
+            HAS_CI=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "CI:" || echo "0")
+            HAS_STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep -c "STAGE:" || echo "0")
+            
+            if [ "$HAS_CI" -eq 0 ] || [ "$HAS_STAGE" -eq 0 ]; then
+                echo "❌ $cmd: Missing CI or STAGE declaration"
                 ERRORS=$((ERRORS + 1))
+                continue
+            fi
+            
+            # Get CI value (take the first one if multiple)
+            CI_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "CI:" | head -1 | sed 's/.*CI: //')
+            STAGE_VALUE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | head -1 | sed 's/.*STAGE: //')
+            
+            # Validate CI value
+            if [ "$CI_VALUE" != "true" ] && [ "$CI_VALUE" != "false" ]; then
+                echo "❌ $cmd: Invalid CI value '$CI_VALUE' (must be true or false)"
+                ERRORS=$((ERRORS + 1))
+                continue
+            fi
+            
+            # Validate STAGE value
+            if ! [[ "$STAGE_VALUE" =~ ^[0-6]$ ]]; then
+                echo "❌ $cmd: Invalid STAGE value '$STAGE_VALUE' (must be 0-6)"
+                ERRORS=$((ERRORS + 1))
+                continue
+            fi
+            
+            # Validate consistency: Stage 0 should be CI: false, Stages 1-6 should be CI: true
+            if [ "$STAGE_VALUE" -eq 0 ] && [ "$CI_VALUE" != "false" ]; then
+                echo "❌ $cmd: Stage 0 must have CI: false (got CI: $CI_VALUE)"
+                ERRORS=$((ERRORS + 1))
+                continue
+            fi
+            
+            if [ "$STAGE_VALUE" -ge 1 ] && [ "$STAGE_VALUE" -le 6 ] && [ "$CI_VALUE" != "true" ]; then
+                echo "❌ $cmd: Stages 1-6 must have CI: true (got CI: $CI_VALUE)"
+                ERRORS=$((ERRORS + 1))
+                continue
+            fi
+            
+            # All validations passed for this command
+            if [ "$STAGE_VALUE" -eq 0 ]; then
+                LOCAL_COMMANDS=$((LOCAL_COMMANDS + 1))
+                echo "✅ $cmd: Local command (Stage 0)"
+            else
+                CI_COMMANDS=$((CI_COMMANDS + 1))
+                STAGED_COMMANDS=$((STAGED_COMMANDS + 1))
+                echo "✅ $cmd: CI command (Stage $STAGE_VALUE)"
             fi
         fi
     done
@@ -521,47 +519,65 @@ validate-justfile:
         echo ""
         echo "✅ All validations passed!"
         echo "✅ Justfile is ready for CI/CD pipeline"
+        echo ""
+        echo "📋 Stage Distribution:"
+        for i in {0..6}; do
+            STAGE_COUNT=$(grep -A 5 -B 5 "^.*:" justfile | grep -B 5 -A 5 "STAGE: $i" | grep "^[a-zA-Z]" | wc -l)
+            if [ "$STAGE_COUNT" -gt 0 ]; then
+                echo "   Stage $i: $STAGE_COUNT commands"
+            fi
+        done
     else
         echo ""
         echo "❌ Validation failed with $ERRORS errors"
         echo "💡 Fix the issues above before pushing"
+        echo ""
+        echo "📋 Rules:"
+        echo "   - All commands must have both # CI: true/false and # STAGE: 0-6"
+        echo "   - Stage 0 = Local only (CI: false)"
+        echo "   - Stages 1-6 = CI commands (CI: true)"
         exit 1
     fi
 
 # CI: false
+# STAGE: 0
 ci-commands:
     #!/usr/bin/env bash
-    echo "📋 CI-suitable commands:"
+    echo "📋 CI-suitable commands (Stages 1-6):"
     
     # Get all commands
     ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
     
     CI_COMMANDS=""
-    NON_CI_COMMANDS=""
+    LOCAL_COMMANDS=""
     
     for cmd in $ALL_COMMANDS; do
         if [ "$cmd" != "default" ]; then
-            # Search for CI comment in the justfile using a more robust pattern
-            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
-                CI_COMMANDS="$CI_COMMANDS $cmd"
-            elif grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: false"; then
-                NON_CI_COMMANDS="$NON_CI_COMMANDS $cmd"
+            # Check if command has stage declaration
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
+                STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
+                if [[ "$STAGE" =~ ^[1-6]$ ]]; then
+                    CI_COMMANDS="$CI_COMMANDS $cmd"
+                elif [[ "$STAGE" =~ ^0$ ]]; then
+                    LOCAL_COMMANDS="$LOCAL_COMMANDS $cmd"
+                fi
             else
-                echo "⚠️  Command '$cmd' missing CI declaration"
+                echo "⚠️  Command '$cmd' missing STAGE declaration"
             fi
         fi
     done
     
-    echo "✅ CI-suitable: $CI_COMMANDS"
-    echo "❌ Local-only: $NON_CI_COMMANDS"
+    echo "✅ CI-suitable (Stages 1-6): $CI_COMMANDS"
+    echo "❌ Local-only (Stage 0): $LOCAL_COMMANDS"
 
 # CI: false
+# STAGE: 0
 stage-commands:
     #!/usr/bin/env bash
-    STAGE=$1
     if [ -z "$STAGE" ]; then
-        echo "❌ Please specify a stage number (1-6)"
-        echo "💡 Usage: just stage-commands <stage_number>"
+        echo "❌ Please specify a stage number (0-6)"
+        echo "💡 Usage: STAGE=0 just stage-commands"
+        echo "💡 Stage 0 = Local commands, Stages 1-6 = CI commands"
         exit 1
     fi
     
@@ -581,12 +597,19 @@ stage-commands:
     done
     
     if [ -n "$STAGE_COMMANDS" ]; then
-        echo "✅ Stage $STAGE commands: $STAGE_COMMANDS"
+        if [ "$STAGE" -eq 0 ]; then
+            echo "✅ Stage $STAGE (Local) commands: $STAGE_COMMANDS"
+        else
+            echo "✅ Stage $STAGE (CI) commands: $STAGE_COMMANDS"
+        fi
     else
         echo "❌ No commands found for stage $STAGE"
     fi
 
+
+
 # CI: false
+# STAGE: 0
 get-stage-info:
     #!/usr/bin/env bash
     echo "📋 Dynamic stage information for pipeline..."
@@ -596,20 +619,18 @@ get-stage-info:
     
     # Initialize stage arrays
     declare -A STAGE_COMMANDS
-    for i in {1..6}; do
+    for i in {0..6}; do
         STAGE_COMMANDS[$i]=""
     done
     
     # Parse commands and their stages
     for cmd in $ALL_COMMANDS; do
         if [ "$cmd" != "default" ]; then
-            # Check if command is CI and has stage
-            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
-                if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
-                    STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
-                    if [[ "$STAGE" =~ ^[1-6]$ ]]; then
-                        STAGE_COMMANDS[$STAGE]="${STAGE_COMMANDS[$STAGE]} $cmd"
-                    fi
+            # Check if command has stage declaration
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
+                STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
+                if [[ "$STAGE" =~ ^[0-6]$ ]]; then
+                    STAGE_COMMANDS[$STAGE]="${STAGE_COMMANDS[$STAGE]} $cmd"
                 fi
             fi
         fi
@@ -617,7 +638,7 @@ get-stage-info:
     
     # Output stage information
     echo "STAGE_INFO_START"
-    for i in {1..6}; do
+    for i in {0..6}; do
         if [ -n "${STAGE_COMMANDS[$i]}" ]; then
             echo "STAGE_${i}:${STAGE_COMMANDS[$i]}"
         else
