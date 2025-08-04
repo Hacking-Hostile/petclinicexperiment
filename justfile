@@ -19,7 +19,10 @@ default:
 # CI: false
 get-mvn-cmd:
     #!/usr/bin/env bash
-    if command -v mvn &> /dev/null; then
+    # Check for local Maven installation first
+    if [ -f "./tools/maven/bin/mvn" ]; then
+        echo "./tools/maven/bin/mvn"
+    elif command -v mvn &> /dev/null; then
         echo "mvn"
     elif [ -f "./mvnw" ]; then
         echo "./mvnw"
@@ -37,15 +40,9 @@ build:
     echo "🔨 Building Spring PetClinic application..."
     if [ -f "pom.xml" ]; then
         echo "📦 Detected Maven project"
-        if command -v mvn &> /dev/null; then
-            mvn clean package -DskipTests
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw clean package -DskipTests 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD clean package -DskipTests
         echo "✅ Build completed successfully!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Detected Gradle project"
@@ -62,15 +59,9 @@ test:
     echo "🧪 Running tests..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven tests"
-        if command -v mvn &> /dev/null; then
-            mvn test
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw test 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD test
         echo "✅ Tests completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle tests"
@@ -87,15 +78,9 @@ clean:
     echo "🧹 Cleaning project..."
     if [ -f "pom.xml" ]; then
         echo "📦 Cleaning Maven project"
-        if command -v mvn &> /dev/null; then
-            mvn clean
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw clean 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD clean
         echo "✅ Clean completed!"
     elif [ -f "build.gradle" ]; then
         echo "📦 Cleaning Gradle project"
@@ -112,15 +97,9 @@ run:
     echo "🖥️ Running Spring PetClinic application..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven application"
-        if command -v mvn &> /dev/null; then
-            mvn spring-boot:run
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw spring-boot:run 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD spring-boot:run
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle application"
         ./gradlew bootRun
@@ -135,15 +114,9 @@ lint:
     echo "🔍 Running linting..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven checkstyle"
-        if command -v mvn &> /dev/null; then
-            mvn checkstyle:check
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw checkstyle:check 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD checkstyle:check
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle linting"
         ./gradlew checkstyleMain
@@ -158,15 +131,9 @@ format:
     echo "🎨 Formatting code..."
     if [ -f "pom.xml" ]; then
         echo "📦 Running Maven formatting"
-        if command -v mvn &> /dev/null; then
-            mvn spotless:apply
-        elif [ -f "./mvnw" ]; then
-            echo "📥 Maven wrapper downloading Maven (first time only)..."
-            ./mvnw spotless:apply 2>/dev/null || echo "⚠️  Maven download in progress..."
-        else
-            echo "❌ Maven not found and no wrapper available"
-            exit 1
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD spotless:apply
     elif [ -f "build.gradle" ]; then
         echo "📦 Running Gradle formatting"
         ./gradlew spotlessApply
@@ -190,29 +157,17 @@ deploy:
 mvn-validate:
     #!/usr/bin/env bash
     echo "✅ Validating Maven project..."
-    if command -v mvn &> /dev/null; then
-        mvn validate
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw validate 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD validate
 
 # CI: false
 mvn-site:
     #!/usr/bin/env bash
     echo "🌐 Generating Maven site..."
-    if command -v mvn &> /dev/null; then
-        mvn site
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw site 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD site
 
 # =============================================================================
 # DATABASE COMMANDS
@@ -222,29 +177,17 @@ mvn-site:
 run-h2:
     #!/usr/bin/env bash
     echo "🗄️  Running with H2 database..."
-    if command -v mvn &> /dev/null; then
-        mvn spring-boot:run -Dspring-boot.run.profiles=h2
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD spring-boot:run -Dspring-boot.run.profiles=h2
 
 # CI: false
 db-init-h2:
     #!/usr/bin/env bash
     echo "🗄️  Initializing H2 database..."
-    if command -v mvn &> /dev/null; then
-        mvn spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD spring-boot:run -Dspring-boot.run.profiles=h2 -Dspring-boot.run.arguments="--spring.jpa.hibernate.ddl-auto=create" &
     sleep 10
     echo "✅ H2 database initialized"
 
@@ -269,29 +212,18 @@ db-schema:
 coverage:
     #!/usr/bin/env bash
     echo "📊 Generating code coverage report..."
-    if command -v mvn &> /dev/null; then
-        mvn jacoco:report
-    elif [ -f "./mvnw" ]; then
-        ./mvnw jacoco:report
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD jacoco:report
     echo "✅ Coverage report generated in target/site/jacoco/"
 
 # CI: true
 cyclonedx-report:
     #!/usr/bin/env bash
     echo "📋 Generating CycloneDX SBOM report..."
-    if command -v mvn &> /dev/null; then
-        mvn cyclonedx:makeAggregateBom
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw cyclonedx:makeAggregateBom 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD cyclonedx:makeAggregateBom
 
 # =============================================================================
 # BUILD AND PACKAGE COMMANDS
@@ -314,15 +246,9 @@ java-version:
 maven-version:
     #!/usr/bin/env bash
     echo "📦 Maven version:"
-    if command -v mvn &> /dev/null; then
-        mvn -version
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw -version 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-        exit 1
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD -version
 
 # CI: false
 status:
@@ -331,14 +257,9 @@ status:
     echo "Java version:"
     java -version
     echo "Maven version:"
-    if command -v mvn &> /dev/null; then
-        mvn -version
-    elif [ -f "./mvnw" ]; then
-        echo "📥 Maven wrapper downloading Maven (first time only)..."
-        ./mvnw -version 2>/dev/null || echo "⚠️  Maven download in progress..."
-    else
-        echo "❌ Maven not found and no wrapper available"
-    fi
+    MVN_CMD=$(just get-mvn-cmd)
+    echo "Using Maven: $MVN_CMD"
+    $MVN_CMD -version
     echo "Git status:"
     git status --porcelain | wc -l | xargs echo "Modified files:"
     echo "Build status:"
@@ -431,13 +352,9 @@ detect:
     if [ -f "pom.xml" ]; then
         echo "📦 Maven project detected"
         echo "Java version: $(java -version 2>&1 | head -1)"
-        if command -v mvn &> /dev/null; then
-            echo "Maven version: $(mvn -version 2>&1 | head -1)"
-        elif [ -f "./mvnw" ]; then
-            echo "Maven wrapper available"
-        else
-            echo "❌ Maven not found and no wrapper available"
-        fi
+        MVN_CMD=$(just get-mvn-cmd)
+        echo "Using Maven: $MVN_CMD"
+        $MVN_CMD -version 2>&1 | head -1
     elif [ -f "build.gradle" ]; then
         echo "📦 Gradle project detected"
         echo "Java version: $(java -version 2>&1 | head -1)"
