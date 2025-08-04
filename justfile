@@ -451,6 +451,30 @@ detect:
 # =============================================================================
 
 # CI: true
+ci:
+    #!/usr/bin/env bash
+    echo "🚀 Running CI commands locally..."
+    
+    # Define CI commands explicitly to avoid recursion
+    CI_COMMANDS="build test clean lint coverage cyclonedx-report mvn-validate ci-validate"
+    
+    echo "Found CI commands: $CI_COMMANDS"
+    
+    # Execute each CI command
+    for cmd in $CI_COMMANDS; do
+        if [ -n "$cmd" ]; then
+            echo "🔄 Executing CI command: just $cmd"
+            just $cmd
+            if [ $? -ne 0 ]; then
+                echo "❌ CI command failed: $cmd"
+                exit 1
+            fi
+        fi
+    done
+    
+    echo "✅ All CI commands completed successfully!"
+
+# CI: true
 ci-validate:
     #!/usr/bin/env bash
     echo "🔍 Validating CI command declarations..."
