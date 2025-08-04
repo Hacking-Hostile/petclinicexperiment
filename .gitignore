@@ -51,4 +51,4 @@ _site/
 !petclinic.css
 
 ### Local Tools ###
-tools/maven/
+# Note: tools/maven/ is NOT ignored so it gets committed for GitHub Actions
