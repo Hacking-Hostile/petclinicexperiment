@@ -367,19 +367,19 @@ detect:
 # CI VALIDATION COMMANDS
 # =============================================================================
 
-# CI: true
+# CI: false
 ci:
     #!/usr/bin/env bash
     echo "🚀 Running CI commands locally..."
     
-    # Define CI commands explicitly to avoid recursion
-    CI_COMMANDS="build test clean coverage cyclonedx-report mvn-validate ci-validate"
+    # Get CI-suitable commands dynamically (excluding ci and ci-validate to avoid recursion)
+    CI_COMMANDS=$(just ci-commands 2>&1 | grep "CI-suitable:" | sed 's/✅ CI-suitable: //' | sed 's/ci ci-validate//g')
     
     echo "Found CI commands: $CI_COMMANDS"
     
     # Execute each CI command
     for cmd in $CI_COMMANDS; do
-        if [ -n "$cmd" ]; then
+        if [ -n "$cmd" ] && [ "$cmd" != "ci" ] && [ "$cmd" != "ci-validate" ]; then
             echo "🔄 Executing CI command: just $cmd"
             just $cmd
             if [ $? -ne 0 ]; then
