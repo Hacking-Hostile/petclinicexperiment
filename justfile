@@ -474,9 +474,9 @@ validate:
                 continue
             fi
             
-            # Validate STAGE value
-            if ! [[ "$STAGE_VALUE" =~ ^[0-6]$ ]]; then
-                echo "❌ $cmd: Invalid STAGE value '$STAGE_VALUE' (must be 0-6)"
+            # Validate STAGE value (Stage 1 is reserved for switching mechanism)
+            if ! [[ "$STAGE_VALUE" =~ ^[0,2-6]$ ]]; then
+                echo "❌ $cmd: Invalid STAGE value '$STAGE_VALUE' (must be 0 or 2-6, Stage 1 is reserved)"
                 ERRORS=$((ERRORS + 1))
                 continue
             fi
@@ -488,9 +488,9 @@ validate:
                     ERRORS=$((ERRORS + 1))
                     continue
                 fi
-            elif [ "$STAGE_VALUE" -ge 1 ] && [ "$STAGE_VALUE" -le 6 ]; then
+            elif [ "$STAGE_VALUE" -ge 2 ] && [ "$STAGE_VALUE" -le 6 ]; then
                 if [ "$CI_VALUE" != "true" ]; then
-                    echo "❌ $cmd: Stages 1-6 must have CI: true (got CI: $CI_VALUE)"
+                    echo "❌ $cmd: Stages 2-6 must have CI: true (got CI: $CI_VALUE)"
                     ERRORS=$((ERRORS + 1))
                     continue
                 fi
@@ -503,8 +503,8 @@ validate:
                 continue
             fi
             
-            if [ "$CI_VALUE" = "true" ] && [ "$STAGE_VALUE" -lt 1 ] || [ "$STAGE_VALUE" -gt 6 ]; then
-                echo "❌ $cmd: CI: true must have Stage 1-6 (got Stage: $STAGE_VALUE)"
+            if [ "$CI_VALUE" = "true" ] && [ "$STAGE_VALUE" -lt 2 ] || [ "$STAGE_VALUE" -gt 6 ]; then
+                echo "❌ $cmd: CI: true must have Stage 2-6 (got Stage: $STAGE_VALUE)"
                 ERRORS=$((ERRORS + 1))
                 continue
             fi
@@ -548,13 +548,14 @@ validate:
         echo "💡 Fix the issues above before pushing"
         echo ""
         echo "📋 Rules:"
-        echo "   - All commands must have both # CI: true/false and # STAGE: 0-6"
+        echo "   - All commands must have both # CI: true/false and # STAGE: 0,2-6"
         echo "   - Stage 0 ↔ CI: false (bidirectional consistency)"
-        echo "   - Stages 1-6 ↔ CI: true (bidirectional consistency)"
+        echo "   - Stages 2-6 ↔ CI: true (bidirectional consistency)"
+        echo "   - Stage 1 is RESERVED for switching mechanism (no just commands)"
         echo "   - If Stage 0, CI must be false"
         echo "   - If CI false, Stage must be 0"
-        echo "   - If Stages 1-6, CI must be true"
-        echo "   - If CI true, Stage must be 1-6"
+        echo "   - If Stages 2-6, CI must be true"
+        echo "   - If CI true, Stage must be 2-6"
         exit 1
     fi
 
@@ -562,7 +563,7 @@ validate:
 # STAGE: 0
 ci-commands:
     #!/usr/bin/env bash
-    echo "📋 CI-suitable commands (Stages 1-6):"
+    echo "📋 CI-suitable commands (Stages 2-6):"
     
     # Get all commands
     ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
@@ -575,7 +576,7 @@ ci-commands:
             # Check if command has stage declaration
             if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
                 STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
-                if [[ "$STAGE" =~ ^[1-6]$ ]]; then
+                if [[ "$STAGE" =~ ^[2-6]$ ]]; then
                     CI_COMMANDS="$CI_COMMANDS $cmd"
                 elif [[ "$STAGE" =~ ^0$ ]]; then
                     LOCAL_COMMANDS="$LOCAL_COMMANDS $cmd"
@@ -586,7 +587,7 @@ ci-commands:
         fi
     done
     
-    echo "✅ CI-suitable (Stages 1-6): $CI_COMMANDS"
+    echo "✅ CI-suitable (Stages 2-6): $CI_COMMANDS"
     echo "❌ Local-only (Stage 0): $LOCAL_COMMANDS"
 
 # CI: false
@@ -594,9 +595,10 @@ ci-commands:
 stage-commands:
     #!/usr/bin/env bash
     if [ -z "$STAGE" ]; then
-        echo "❌ Please specify a stage number (0-6)"
+        echo "❌ Please specify a stage number (0,2-6)"
         echo "💡 Usage: STAGE=0 just stage-commands"
-        echo "💡 Stage 0 = Local commands, Stages 1-6 = CI commands"
+        echo "💡 Stage 0 = Local commands, Stages 2-6 = CI commands"
+        echo "💡 Stage 1 is RESERVED for switching mechanism"
         exit 1
     fi
     
@@ -629,6 +631,8 @@ stage-commands:
 
 
 
+
+
 # CI: false
 # STAGE: 0
 get-stage-info:
@@ -638,7 +642,7 @@ get-stage-info:
     # Get all commands
     ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
     
-    # Initialize stage arrays
+    # Initialize stage arrays (Stage 1 is reserved for switching mechanism)
     declare -A STAGE_COMMANDS
     for i in {0..6}; do
         STAGE_COMMANDS[$i]=""
@@ -650,7 +654,7 @@ get-stage-info:
             # Check if command has stage declaration
             if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
                 STAGE=$(grep -A 5 -B 5 "^$cmd:" justfile | grep "STAGE:" | sed 's/.*STAGE: //')
-                if [[ "$STAGE" =~ ^[0-6]$ ]]; then
+                if [[ "$STAGE" =~ ^[0,2-6]$ ]]; then
                     STAGE_COMMANDS[$STAGE]="${STAGE_COMMANDS[$STAGE]} $cmd"
                 fi
             fi
