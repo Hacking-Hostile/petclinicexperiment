@@ -49,6 +49,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Just
+        uses: taiki-e/install-action@just
+
+      - name: Execute Stage 4 Commands
+        run: |
+          echo "🚀 Running stage 4 commands..."
+          
+          # Get stage 4 commands
+          STAGE_COMMANDS=$(just stage-commands 4 2>&1 | grep "Stage 4 commands:" | sed 's/✅ Stage 4 commands: //')
+          
+          echo "Found stage 4 commands: $STAGE_COMMANDS"
+          
+          # Execute each stage 4 command
+          for cmd in $STAGE_COMMANDS; do
+            if [ -n "$cmd" ]; then
+              echo "🔄 Executing stage 4 command: just $cmd"
+              just $cmd
+              if [ $? -ne 0 ]; then
+                echo "❌ Stage 4 command failed: $cmd"
+                exit 1
+              fi
+            fi
+          done
+          
+          echo "✅ All stage 4 commands completed successfully!"
+
       - name: SonarQube Analysis
         run: |
           echo "📊 Running SonarQube analysis..."

@@ -35,6 +35,7 @@ get-mvn-cmd:
 # =============================================================================
 
 # CI: true
+# STAGE: 3
 build:
     #!/usr/bin/env bash
     echo "🔨 Building application..."
@@ -54,6 +55,7 @@ build:
     fi
 
 # CI: true
+# STAGE: 4
 test:
     #!/usr/bin/env bash
     echo "🧪 Running tests..."
@@ -73,6 +75,7 @@ test:
     fi
 
 # CI: true
+# STAGE: 3
 clean:
     #!/usr/bin/env bash
     echo "🧹 Cleaning project..."
@@ -154,6 +157,7 @@ deploy:
 # =============================================================================
 
 # CI: true
+# STAGE: 3
 mvn-validate:
     #!/usr/bin/env bash
     echo "✅ Validating Maven project..."
@@ -209,6 +213,7 @@ db-schema:
 # =============================================================================
 
 # CI: true
+# STAGE: 4
 coverage:
     #!/usr/bin/env bash
     echo "📊 Generating code coverage report..."
@@ -218,6 +223,7 @@ coverage:
     echo "✅ Coverage report generated in target/site/jacoco/"
 
 # CI: true
+# STAGE: 3
 cyclonedx-report:
     #!/usr/bin/env bash
     echo "📋 Generating CycloneDX SBOM report..."
@@ -392,6 +398,7 @@ ci:
     echo "✅ All CI commands completed successfully!"
 
 # CI: true
+# STAGE: 2
 ci-validate:
     #!/usr/bin/env bash
     echo "🔍 Validating CI command declarations..."
@@ -421,6 +428,33 @@ ci-validate:
     fi
     
     echo "✅ All commands have CI declarations"
+    
+    # Validate stage declarations for CI commands
+    echo "🔍 Validating stage declarations for CI commands..."
+    MISSING_STAGE_COMMENTS=""
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            # Check if command is CI and has stage declaration
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "CI: true"; then
+                if ! grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE:"; then
+                    MISSING_STAGE_COMMENTS="$MISSING_STAGE_COMMENTS $cmd"
+                fi
+            fi
+        fi
+    done
+    
+    if [ -n "$MISSING_STAGE_COMMENTS" ]; then
+        echo "❌ CI commands missing STAGE declarations: $MISSING_STAGE_COMMENTS"
+        echo "💡 Add '# STAGE: X' to each CI command"
+        echo "💡 Example:"
+        echo "   # CI: true"
+        echo "   # STAGE: 3"
+        echo "   build:"
+        echo "       echo 'Building...'"
+        exit 1
+    fi
+    
+    echo "✅ All CI commands have stage declarations"
 
 # CI: false
 ci-commands:
@@ -447,4 +481,35 @@ ci-commands:
     done
     
     echo "✅ CI-suitable: $CI_COMMANDS"
-    echo "❌ Local-only: $NON_CI_COMMANDS" 
+    echo "❌ Local-only: $NON_CI_COMMANDS"
+
+# CI: false
+stage-commands:
+    #!/usr/bin/env bash
+    STAGE=$1
+    if [ -z "$STAGE" ]; then
+        echo "❌ Please specify a stage number (1-6)"
+        echo "💡 Usage: just stage-commands <stage_number>"
+        exit 1
+    fi
+    
+    echo "📋 Commands for stage $STAGE:"
+    
+    # Get all commands
+    ALL_COMMANDS=$(just --list | grep -v "Available recipes:" | grep -v "^#" | sed 's/#.*$//' | tr -d ' ' | grep -v '^$')
+    
+    STAGE_COMMANDS=""
+    for cmd in $ALL_COMMANDS; do
+        if [ "$cmd" != "default" ]; then
+            # Check if command is for the specified stage
+            if grep -A 5 -B 5 "^$cmd:" justfile | grep -q "STAGE: $STAGE"; then
+                STAGE_COMMANDS="$STAGE_COMMANDS $cmd"
+            fi
+        fi
+    done
+    
+    if [ -n "$STAGE_COMMANDS" ]; then
+        echo "✅ Stage $STAGE commands: $STAGE_COMMANDS"
+    else
+        echo "❌ No commands found for stage $STAGE"
+    fi 

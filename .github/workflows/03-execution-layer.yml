@@ -75,28 +75,28 @@ jobs:
           echo "📋 Available CI commands:"
           just ci-commands
       
-      - name: Execute CI Commands Only
+      - name: Execute Stage 3 Commands
         run: |
-          echo "🚀 Running CI-suitable commands only..."
+          echo "🚀 Running stage 3 commands..."
           
-          # Get CI-suitable commands
-          CI_COMMANDS=$(just ci-commands 2>&1 | grep "CI-suitable:" | sed 's/✅ CI-suitable: //')
+          # Get stage 3 commands
+          STAGE_COMMANDS=$(just stage-commands 3 2>&1 | grep "Stage 3 commands:" | sed 's/✅ Stage 3 commands: //')
           
-          echo "Found CI commands: $CI_COMMANDS"
+          echo "Found stage 3 commands: $STAGE_COMMANDS"
           
-          # Execute each CI command
-          for cmd in $CI_COMMANDS; do
+          # Execute each stage 3 command
+          for cmd in $STAGE_COMMANDS; do
             if [ -n "$cmd" ]; then
-              echo "🔄 Executing CI command: just $cmd"
+              echo "🔄 Executing stage 3 command: just $cmd"
               just $cmd
               if [ $? -ne 0 ]; then
-                echo "❌ CI command failed: $cmd"
+                echo "❌ Stage 3 command failed: $cmd"
                 exit 1
               fi
             fi
           done
           
-          echo "✅ All CI commands completed successfully!"
+          echo "✅ All stage 3 commands completed successfully!"
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
