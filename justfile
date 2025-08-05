@@ -462,16 +462,56 @@ build-docker: # 🐳 Build Docker image
     IMAGE_TAG="latest"
     
     echo "🔨 Building Docker image: $IMAGE_NAME:$IMAGE_TAG"
-    docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    
+    # Use buildx for better CI compatibility
+    if docker buildx version &> /dev/null; then
+        echo "🔧 Using Docker Buildx..."
+        docker buildx build --platform linux/amd64 -t $IMAGE_NAME:$IMAGE_TAG .
+    else
+        echo "🔧 Using standard Docker build..."
+        docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    fi
     
     if [ $? -eq 0 ]; then
         echo "✅ Docker image built successfully!"
         echo "📋 Image info:"
-        docker images $IMAGE_NAME:$IMAGE_TAG
+        docker images $IMAGE_NAME:$IMAGE_TAG 2>/dev/null || echo "Image built but not available locally (multi-platform build)"
     else
         echo "❌ Docker build failed"
         exit 1
     fi
+
+# CI: true
+# STAGE: 5
+test-docker: # 🧪 Test Docker environment
+    #!/usr/bin/env bash
+    echo "🧪 Testing Docker environment..."
+    
+    # Check if Docker is available
+    if ! command -v docker &> /dev/null; then
+        echo "❌ Docker is not installed or not in PATH"
+        exit 1
+    fi
+    
+    echo "✅ Docker is installed"
+    echo "Version: $(docker --version)"
+    
+    # Test Docker daemon
+    if docker info &> /dev/null; then
+        echo "✅ Docker daemon is running"
+    else
+        echo "❌ Docker daemon is not running"
+        exit 1
+    fi
+    
+    # Test Docker buildx
+    if docker buildx version &> /dev/null; then
+        echo "✅ Docker Buildx is available"
+    else
+        echo "ℹ️ Docker Buildx is not available (using standard build)"
+    fi
+    
+    echo "✅ Docker environment test completed!"
 
 # CI: true
 # STAGE: 5
@@ -487,15 +527,21 @@ remove-docker: # 🗑️ Remove Docker images
     
     IMAGE_NAME="spring-petclinic"
     
-    # Remove specific image
-    if docker images $IMAGE_NAME &> /dev/null; then
-        echo "🗑️ Removing $IMAGE_NAME images..."
-        docker rmi $(docker images $IMAGE_NAME -q) 2>/dev/null || echo "No $IMAGE_NAME images to remove"
+    # Remove specific image (handle errors gracefully)
+    echo "🗑️ Removing $IMAGE_NAME images..."
+    if docker images $IMAGE_NAME 2>/dev/null | grep -q $IMAGE_NAME; then
+        docker rmi $(docker images $IMAGE_NAME -q) 2>/dev/null || echo "Failed to remove $IMAGE_NAME images"
+    else
+        echo "ℹ️ No $IMAGE_NAME images found"
     fi
     
     # Remove dangling images
     echo "🧹 Cleaning up dangling images..."
-    docker image prune -f
+    docker image prune -f 2>/dev/null || echo "Failed to prune images"
+    
+    # Clean up build cache
+    echo "🧹 Cleaning up build cache..."
+    docker builder prune -f 2>/dev/null || echo "Failed to clean build cache"
     
     echo "✅ Docker cleanup completed!"
 
