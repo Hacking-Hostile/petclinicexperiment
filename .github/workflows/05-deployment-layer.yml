@@ -12,7 +12,8 @@ on:
 jobs:
   deployment-stage:
     runs-on: ubuntu-latest
-    # ALWAYS RUN - no conditions
+    # Run after ANY completion of Stage 4
+    if: ${{ github.event.workflow_run.conclusion != null }}
     
     steps:
       - name: 📋 Checkout code
