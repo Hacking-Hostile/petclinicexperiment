@@ -8,15 +8,25 @@ on:
     workflows: ["04 - Security Layer"]
     types:
       - completed
+  # Manual trigger for testing
+  workflow_dispatch:
 
 jobs:
   deployment-stage:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Allow manual trigger or successful completion of Stage 4
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
     
     steps:
       - name: 📋 Checkout code
         uses: actions/checkout@v4
+        
+      - name: 🔍 Debug workflow trigger
+        run: |
+          echo "🔍 Debugging workflow trigger..."
+          echo "Event name: ${{ github.event_name }}"
+          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "Triggering workflow: ${{ github.event.workflow_run.name }}"
         
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
