@@ -1,115 +1,84 @@
 # Multi-Language CI/CD Pipeline - Deployment Layer
 # This workflow implements ONLY the Deployment Layer from the architecture diagram
 
-name: 05 - Deployment Layer
-
-# =============================================================================
-# DEPLOYMENT LAYER - Deployment & Operations
-# =============================================================================
+name: "05 - Deployment Layer"
 
 on:
   workflow_run:
     workflows: ["04 - Security Layer"]
-    types: [completed]
+    types:
+      - completed
 
 jobs:
-  container-registry:
-    name: 🐳 Container Registry
+  deployment-stage:
     runs-on: ubuntu-latest
-
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
     steps:
-      - name: Checkout code
+      - name: 📋 Checkout code
         uses: actions/checkout@v4
-
-      - name: Multi-stage Docker build
+        
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: 🐳 Setup Docker
+        uses: docker/setup-buildx-action@v3
+        
+      - name: 📋 Get Stage 5 commands
+        id: get-stage-info
         run: |
-          echo "🐳 Building multi-stage Docker image..."
-          echo "✅ Docker build completed"
-
-      - name: Multi-architecture support
+          echo "📋 Getting Stage 5 commands..."
+          STAGE_INFO=$(just get-stage-info)
+          echo "STAGE_INFO<<EOF" >> $GITHUB_OUTPUT
+          echo "$STAGE_INFO" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: 🔍 Parse Stage 5 commands
+        id: parse-stage-5
         run: |
-          echo "🏗️ Building for multiple architectures..."
-          echo "✅ Multi-arch build completed"
-
-      - name: Image signing
+          echo "🔍 Parsing Stage 5 commands..."
+          STAGE_INFO="${{ steps.get-stage-info.outputs.STAGE_INFO }}"
+          
+          # Extract Stage 5 commands
+          STAGE_5_COMMANDS=$(echo "$STAGE_INFO" | grep "^STAGE_5:" | sed 's/STAGE_5://' | tr -d ' ')
+          
+          if [ -n "$STAGE_5_COMMANDS" ]; then
+            echo "✅ Found Stage 5 commands: $STAGE_5_COMMANDS"
+            echo "commands=$STAGE_5_COMMANDS" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ No Stage 5 commands found"
+            echo "commands=" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 🐳 Execute Stage 5 commands
+        if: steps.parse-stage-5.outputs.commands != ''
         run: |
-          echo "✍️ Signing container image..."
-          echo "✅ Image signed"
-
-      - name: Vulnerability assessment
-        run: |
-          echo "🔍 Assessing container vulnerabilities..."
-          echo "✅ Vulnerability assessment completed"
-
-  kubernetes-deployment:
-    name: ☸️ Kubernetes Deployment
-    runs-on: ubuntu-latest
-    needs: container-registry
-
-    steps:
-      - name: Blue/Green deployment
-        run: |
-          echo "🔵🟢 Executing Blue/Green deployment..."
-          echo "✅ Blue/Green deployment completed"
-
-      - name: Canary deployment
-        run: |
-          echo "🐦 Executing Canary deployment..."
-          echo "✅ Canary deployment completed"
-
-      - name: Progressive delivery
-        run: |
-          echo "📈 Progressive delivery with feature flags..."
-          echo "✅ Progressive delivery completed"
-
-      - name: Automated rollback
-        run: |
-          echo "🔄 Setting up automated rollback..."
-          echo "✅ Rollback configured"
-
-  monitoring-observability:
-    name: 📊 Monitoring & Observability
-    runs-on: ubuntu-latest
-    needs: kubernetes-deployment
-
-    steps:
-      - name: Health checks
-        run: |
-          echo "❤️ Configuring health checks..."
-          echo "✅ Health checks configured"
-
-      - name: Performance metrics
-        run: |
-          echo "📈 Setting up performance metrics..."
-          echo "✅ Performance metrics configured"
-
-      - name: Distributed tracing
-        run: |
-          echo "🔍 Setting up distributed tracing..."
-          echo "✅ Distributed tracing configured"
-
-      - name: Log aggregation
-        run: |
-          echo "📝 Setting up log aggregation..."
-          echo "✅ Log aggregation configured"
-
-      - name: Alert management
-        run: |
-          echo "🚨 Configuring alert management..."
-          echo "✅ Alert management configured"
-
-  deployment-summary:
-    name: 📊 Deployment Summary
-    runs-on: ubuntu-latest
-    needs: [container-registry, kubernetes-deployment, monitoring-observability]
-
-    steps:
-      - name: Display deployment summary
+          echo "🐳 Executing Stage 5 (Deployment) commands..."
+          echo "=============================================="
+          
+          COMMANDS="${{ steps.parse-stage-5.outputs.commands }}"
+          
+          for cmd in $COMMANDS; do
+            if [ -n "$cmd" ]; then
+              echo "🔄 Executing: just $cmd"
+              just $cmd
+              if [ $? -ne 0 ]; then
+                echo "❌ Command failed: just $cmd"
+                exit 1
+              fi
+              echo "✅ Command completed: just $cmd"
+            fi
+          done
+          
+          echo "✅ All Stage 5 commands completed successfully!"
+          
+      - name: 📊 Deployment Summary
         run: |
           echo "📊 DEPLOYMENT LAYER SUMMARY"
-          echo "==========================="
-          echo "✅ Container Registry: Completed"
-          echo "✅ Kubernetes Deployment: Completed"
-          echo "✅ Monitoring & Observability: Completed"
-          echo ""
-          echo "✅ Deployment Layer completed - ready for Cross-cutting Concerns"
+          echo "============================"
+          echo "✅ Stage 5 (Deployment) completed"
+          echo "🐳 Docker commands executed successfully"
+          echo "🚀 Ready for next stage..."
