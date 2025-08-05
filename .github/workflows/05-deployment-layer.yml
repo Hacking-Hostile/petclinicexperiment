@@ -8,8 +8,6 @@ on:
     workflows: ["04 - Security Layer"]
     types:
       - completed
-  # Temporary manual trigger for testing
-  workflow_dispatch:
 
 jobs:
   deployment-stage:
