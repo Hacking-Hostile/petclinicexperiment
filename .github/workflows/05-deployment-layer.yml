@@ -27,6 +27,9 @@ jobs:
       - name: 🐳 Setup Docker
         uses: docker/setup-buildx-action@v3
         
+      - name: 📋 Setup Just
+        uses: taiki-e/install-action@just
+        
       - name: 📋 Get Stage 5 commands
         id: get-stage-info
         run: |
