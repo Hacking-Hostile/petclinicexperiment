@@ -55,8 +55,8 @@ jobs:
           echo "🔍 Parsing Stage 5 commands..."
           STAGE_INFO="${{ steps.get-stage-info.outputs.STAGE_INFO }}"
           
-          # Extract Stage 5 commands
-          STAGE_5_COMMANDS=$(echo "$STAGE_INFO" | grep "^STAGE_5:" | sed 's/STAGE_5://' | tr -d ' ')
+                     # Extract Stage 5 commands
+           STAGE_5_COMMANDS=$(echo "$STAGE_INFO" | grep "^STAGE_5:" | sed 's/STAGE_5://' | tr -d ' ' | tr ',' ' ')
           
           if [ -n "$STAGE_5_COMMANDS" ]; then
             echo "✅ Found Stage 5 commands: $STAGE_5_COMMANDS"
@@ -74,17 +74,19 @@ jobs:
           
           COMMANDS="${{ steps.parse-stage-5.outputs.commands }}"
           
-          for cmd in $COMMANDS; do
-            if [ -n "$cmd" ]; then
-              echo "🔄 Executing: just $cmd"
-              just $cmd
-              if [ $? -ne 0 ]; then
-                echo "❌ Command failed: just $cmd"
-                exit 1
-              fi
-              echo "✅ Command completed: just $cmd"
-            fi
-          done
+                     # Split commands by space and execute each one
+           IFS=' ' read -ra CMD_ARRAY <<< "$COMMANDS"
+           for cmd in "${CMD_ARRAY[@]}"; do
+             if [ -n "$cmd" ]; then
+               echo "🔄 Executing: just $cmd"
+               just $cmd
+               if [ $? -ne 0 ]; then
+                 echo "❌ Command failed: just $cmd"
+                 exit 1
+               fi
+               echo "✅ Command completed: just $cmd"
+             fi
+           done
           
           echo "✅ All Stage 5 commands completed successfully!"
           
