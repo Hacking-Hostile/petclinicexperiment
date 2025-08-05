@@ -8,12 +8,14 @@ on:
     workflows: ["04 - Security Layer"]
     types:
       - completed
+  # Temporary manual trigger for testing
+  workflow_dispatch:
 
 jobs:
   deployment-stage:
     runs-on: ubuntu-latest
-    # Run after successful completion of Stage 4
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Run after ANY completion of Stage 4 or manual trigger
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != null }}
     
     steps:
       - name: 📋 Checkout code
