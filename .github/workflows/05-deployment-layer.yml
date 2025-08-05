@@ -14,8 +14,8 @@ on:
 jobs:
   deployment-stage:
     runs-on: ubuntu-latest
-    # Allow manual trigger or successful completion of Stage 4
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    # Always run - either manual trigger or after Stage 4
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' }}
     
     steps:
       - name: 📋 Checkout code
@@ -25,8 +25,13 @@ jobs:
         run: |
           echo "🔍 Debugging workflow trigger..."
           echo "Event name: ${{ github.event_name }}"
-          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "Triggering workflow: ${{ github.event.workflow_run.name }}"
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
+            echo "Triggering workflow: ${{ github.event.workflow_run.name }}"
+          else
+            echo "Manual trigger detected"
+          fi
+          echo "✅ Stage 5 workflow is running!"
         
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
