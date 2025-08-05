@@ -9,7 +9,7 @@ name: 04 - Security Layer
 
 on:
   workflow_run:
-    workflows: ["03-Execution Layer"]
+    workflows: ["03 - Execution Layer"]
     types: [completed]
   # Manual trigger for testing
   workflow_dispatch:
