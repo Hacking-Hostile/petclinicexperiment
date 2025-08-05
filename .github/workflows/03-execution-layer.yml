@@ -1,7 +1,7 @@
 # Multi-Language CI/CD Pipeline - Execution Layer
 # This workflow implements ONLY the Execution Layer (Just Commands) from the architecture diagram
 
-name: 03-Execution Layer
+name: 03 - Execution Layer
 
 # =============================================================================
 # EXECUTION LAYER - Just Commands

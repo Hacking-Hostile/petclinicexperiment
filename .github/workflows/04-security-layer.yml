@@ -104,3 +104,5 @@ jobs:
           echo "✅ Stage 4 Commands: Completed"
           echo ""
           echo "✅ Security Layer completed - ready for Deployment Layer"
+          echo "🔍 This workflow name: 04 - Security Layer"
+          echo "🔍 Should trigger: 05 - Deployment Layer"
