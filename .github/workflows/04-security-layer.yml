@@ -16,8 +16,7 @@ jobs:
   security-layer:
     name: 🔒 Security & Quality Layer
     runs-on: ubuntu-latest
-    # Run after successful completion of Stage 3
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Run after ANY completion of Stage 3
 
     steps:
       - name: Checkout code
